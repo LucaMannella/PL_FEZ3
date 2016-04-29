@@ -49,6 +49,9 @@ namespace PL_FEZ03
                 Thread.Sleep(700);
                 multicolorLED.TurnWhite();
                 Thread.Sleep(700);
+                multicolorLED.TurnBlue();
+                Thread.Sleep(700);
+                //luka suca
             }
 
         }
