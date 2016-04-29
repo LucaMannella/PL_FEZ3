@@ -39,8 +39,16 @@ namespace PL_FEZ03
 
             Mainboard.SetDebugLED(true);
 
-            while (true)
-            {
+            if( camera.CameraReady ) {
+                camera.BitmapStreamed += streamed;
+                camera.PictureCaptured += captured;
+                //camera.TakePicture();
+                camera.StartStreaming();
+                //Thread.Sleep(30);
+                //camera.StopStreaming();                         
+            }
+
+            while( true ) {
                 multicolorLED.TurnBlue();
                 Thread.Sleep(700);
                 multicolorLED.TurnGreen();
@@ -49,22 +57,10 @@ namespace PL_FEZ03
                 Thread.Sleep(700);
                 multicolorLED.TurnWhite();
                 Thread.Sleep(700);
-                multicolorLED.TurnBlue();
-                //uecwuhuie
-                Thread.Sleep(700);
-                //luka suca
-                if (camera.CameraReady)
-                {
-                    camera.BitmapStreamed += streamed;
-                    camera.PictureCaptured += captured;
-                    //camera.TakePicture();
-                    camera.StartStreaming();
-                    //Thread.Sleep(30);
-                    //camera.StopStreaming();                         
-                }
             }
 
         }
+
         void captured(Camera sender, GT.Picture picture)
         {
             displayT35.SimpleGraphics.DisplayImage(picture, 0, 0);
