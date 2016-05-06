@@ -16,7 +16,7 @@ namespace PL_Server
 
         public void OpenConnect()
         {
-            string myConnectionString = "User Id=root;Host=localhost;Database=progettoPDS";
+            string myConnectionString = "User Id=root;Host=localhost;Database=PL_FEZ03";
             myConn = new MySqlConnection(myConnectionString);
             myConn.Open();
             connection_Opened = true;
