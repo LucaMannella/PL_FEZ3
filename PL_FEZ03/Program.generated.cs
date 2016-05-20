@@ -24,6 +24,15 @@ namespace PL_FEZ03 {
         /// <summary>The Multicolor LED module using socket 11 of the mainboard.</summary>
         private Gadgeteer.Modules.GHIElectronics.MulticolorLED multicolorLED;
         
+        /// <summary>The Ethernet J11D module using socket 7 of the mainboard.</summary>
+        private Gadgeteer.Modules.GHIElectronics.EthernetJ11D ethernet;
+        
+        /// <summary>The USB Client DP module using socket 1 of the mainboard.</summary>
+        private Gadgeteer.Modules.GHIElectronics.USBClientDP usbClientDP;
+        
+        /// <summary>The Button module using socket 4 of the mainboard.</summary>
+        private Gadgeteer.Modules.GHIElectronics.Button button;
+        
         /// <summary>This property provides access to the Mainboard API. This is normally not necessary for an end user program.</summary>
         protected new static GHIElectronics.Gadgeteer.FEZSpider Mainboard {
             get {
@@ -49,6 +58,9 @@ namespace PL_FEZ03 {
             this.displayT35 = new GTM.GHIElectronics.DisplayT35(14, 13, 12, 10);
             this.camera = new GTM.GHIElectronics.Camera(3);
             this.multicolorLED = new GTM.GHIElectronics.MulticolorLED(11);
+         //   this.ethernet = new GTM.GHIElectronics.EthernetJ11D(7);
+            this.usbClientDP = new GTM.GHIElectronics.USBClientDP(1);
+            this.button = new GTM.GHIElectronics.Button(4);
         }
     }
 }
