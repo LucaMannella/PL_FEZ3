@@ -10,8 +10,21 @@ namespace PL_Server
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Il programma funziona!");
-            Thread.Sleep(5000);
+            bool res;
+            String name = "Luca";
+            Console.WriteLine("Il programma comincia!");
+
+            Database db = new Database();
+            db.OpenConnect();
+            res = db.insertName(name);
+            db.CloseConnect();
+
+            if(res)
+                Console.WriteLine(name+" succesfully inserted!\n");
+            else
+                Console.WriteLine("Something wrong happens!");
+
+            Console.ReadKey();
         }
     }
 }
