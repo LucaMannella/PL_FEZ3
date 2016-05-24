@@ -33,6 +33,7 @@ namespace PL_Server
             MySqlCommand myCommand = new MySqlCommand(query, myConn);
             return myCommand.ExecuteNonQuery();
         }
+
         public int ExecuteNonQuery(string query, byte[] bytes)
         {
             //query = query.Replace("\\", "\\\\");
@@ -40,6 +41,7 @@ namespace PL_Server
             myCommand.Parameters.Add("@hash_code", bytes);
             return myCommand.ExecuteNonQuery();
         }
+
         public int ExecuteNonQuery(string query, DateTime d)
         {
             //query = query.Replace("\\", "\\\\");
@@ -107,6 +109,30 @@ namespace PL_Server
         public string validate(string s)
         {
             return MySqlHelper.EscapeString(s);
+        }
+
+
+        /**
+         * This method allows to insert a new name inside the test table
+         * of the PL_FEZ03 database.
+         * 
+         * @param name - The name that you want to insert
+         * @returns True if the name was inserted, false otherwise.
+         */
+        public bool insertName(String name)
+        {
+            if (connection_Opened)
+            {
+                String query = "INSERT INTO test(Name) VALUES('" + name + "');";
+                int res = ExecuteNonQuery(query);
+
+                if (res < 0)
+                    return false;
+                else
+                    return true;
+            }
+            else
+                return false;
         }
     }
 }

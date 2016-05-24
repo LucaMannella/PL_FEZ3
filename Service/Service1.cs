@@ -13,8 +13,7 @@ namespace FinalService
     {
         public string checkImage(string value)
         {
-
-            return "Fuck yeah !!";
+            return "Fuck yeah!" + "\n" + "I received: " + value;
         }
 
 
