@@ -64,9 +64,8 @@ namespace Server
         {
             s.SendFile(fileName);
         }
-        public void receiveFile(string path_file, long lung)
-        {
-            FileStream fileW = File.Open(path_file, FileMode.Create);
+        public void receiveFile(long lung)
+        {            
             byte[] buffer = new byte[20480];
 
             long totRicevuti = 0;
@@ -77,13 +76,9 @@ namespace Server
                 if (mancanti >= 20480)
                     ricevuti = s.Receive(buffer, 20480, SocketFlags.None);
                 else
-                    ricevuti = s.Receive(buffer, (int)mancanti, SocketFlags.None);
-                fileW.Write(buffer, 0, ricevuti);
+                    ricevuti = s.Receive(buffer, (int)mancanti, SocketFlags.None);                
                 totRicevuti += ricevuti;
-            }
-
-            fileW.Seek(0, SeekOrigin.Begin);            
-            fileW.Close();
+            }            
             return;
         }
     }

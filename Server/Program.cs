@@ -5,11 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net.Sockets;
 using System.Net;
+using System.Threading;
 
 namespace Server
 {
     class Program
     {
+        MySocket s;
         static void Main(string[] args)
         {
             Program p = new Program();
@@ -20,9 +22,9 @@ namespace Server
         private void StartListening()
         {
             Socket handler;            
-            //IPAddress ip = IPAddress.Parse("10.13.15.211");
-            //IPEndPoint localEndPoint = new IPEndPoint(ip, 1500);
-            IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, 1500);            
+            IPAddress ip = IPAddress.Parse("192.168.137.1");
+            IPEndPoint localEndPoint = new IPEndPoint(ip, 1500);
+            //IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, 1500);            
             // Create a TCP/IP socket.
             Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);            
 
@@ -37,7 +39,13 @@ namespace Server
                 {
                     Console.WriteLine("Waiting for a connection...");
                     // Program is suspended while waiting for an incoming connection.
-                    handler = listener.Accept();                     
+                    handler = listener.Accept();                    
+                   
+                    s = new MySocket(handler);                    
+                    ThreadStart threadDelegate = new ThreadStart(elaborazione);
+                    Thread newThread = new Thread(threadDelegate);
+                    newThread.Start();
+                     
                 }
             }
             catch (Exception e)
@@ -47,6 +55,19 @@ namespace Server
                 Console.WriteLine("Message : " + e.Message);
                 return;
             }
+        }
+
+        private void elaborazione()
+        {
+            byte[] buffer=new byte[1024];
+            long lungImage;
+            //mi faccio mandare grandezza immagine
+            s.Receive(buffer, 1, SocketFlags.None);
+            lungImage= BitConverter.ToInt64(buffer, 0);
+            //mi faccio mandare l'immagine
+            s.receiveFile(lungImage);
+            
+
         }
     }
 }
