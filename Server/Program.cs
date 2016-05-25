@@ -57,13 +57,10 @@ namespace Server
             }
         }
 
+        long lungImage = 230454;
         private void elaborazione()
         {
-            byte[] buffer=new byte[1024];
-            long lungImage;
-            //mi faccio mandare grandezza immagine
-            s.Receive(buffer, 1, SocketFlags.None);
-            lungImage= BitConverter.ToInt64(buffer, 0);
+     
             //mi faccio mandare l'immagine
             s.receiveFile(lungImage);
             

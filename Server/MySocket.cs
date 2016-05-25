@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using System.Net;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Drawing;
 
 
 namespace Server
@@ -14,6 +15,7 @@ namespace Server
     class MySocket
     {
         private Socket s;
+        private int cont = 0;
 
         public MySocket(Socket s)
         {
@@ -65,21 +67,41 @@ namespace Server
             s.SendFile(fileName);
         }
         public void receiveFile(long lung)
-        {            
-            byte[] buffer = new byte[20480];
-
+        {
+            byte[] buffer = new byte[lung];
+          
+            
             long totRicevuti = 0;
-            int ricevuti;
+            int ricevuti=0;
             long mancanti;
             while ((mancanti = lung - totRicevuti) > 0)
             {
-                if (mancanti >= 20480)
-                    ricevuti = s.Receive(buffer, 20480, SocketFlags.None);
+                if (mancanti >= lung)
+                    ricevuti = s.Receive(buffer, (int) lung, SocketFlags.None);
                 else
-                    ricevuti = s.Receive(buffer, (int)mancanti, SocketFlags.None);                
+                    ricevuti = s.Receive(buffer, (int) totRicevuti, (int)mancanti, SocketFlags.None);                
                 totRicevuti += ricevuti;
-            }            
+            }
+
+
+             var imageConverter = new ImageConverter();
+             var image = (Image)imageConverter.ConvertFrom(buffer);
+             Bitmap a =  new Bitmap(image);
+             a.Save(@"C:\Users\Alfonso-LAPTOP\Desktop\image"+cont+".jpg");
+            cont++;
+            /*
+            var ms = new MemoryStream();
+            ms.Write(buffer, 0, (int)lung);
+            ms.Seek(0, SeekOrigin.Begin);
+            Bitmap a = Bitmap.FromStream(ms;
+            System.Drawing.Image image = Image.FromStream(ms);
+            
+            image.Save(@"C:\Users\Alfonso-LAPTOP\Desktop\image.jpg");
+            */
+          
+
             return;
+           
         }
     }
 }

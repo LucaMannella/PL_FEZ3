@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service", "Service\Service.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server", "Server\Server.csproj", "{1221ABF3-D7E2-43AB-B5EA-BA52741D949D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "Client\Client.csproj", "{268277CF-3D4A-4930-881E-5F43D977AD4F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +39,12 @@ Global
 		{1221ABF3-D7E2-43AB-B5EA-BA52741D949D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1221ABF3-D7E2-43AB-B5EA-BA52741D949D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1221ABF3-D7E2-43AB-B5EA-BA52741D949D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{268277CF-3D4A-4930-881E-5F43D977AD4F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{268277CF-3D4A-4930-881E-5F43D977AD4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{268277CF-3D4A-4930-881E-5F43D977AD4F}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{268277CF-3D4A-4930-881E-5F43D977AD4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{268277CF-3D4A-4930-881E-5F43D977AD4F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{268277CF-3D4A-4930-881E-5F43D977AD4F}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
