@@ -12,11 +12,19 @@ namespace Server
     class Program
     {
         MySocket s;
+        MotionDetector3Optimized motionDetector = new MotionDetector3Optimized();
+        //oppure usare:
+        //MotionDetector4 motionDetector = new MotionDetector4();
+        System.Drawing.Bitmap lastFrame = null;
+        //grandezza immagine che mi aspetto di ricevere
+        long lungImage = 230454;
+        //livello che dice quando far scattare allarme ed è compreso tra 0 e 1
+        private double alarmLevel = 0.005;
+        
         static void Main(string[] args)
         {
-            Program p = new Program();
+            Program p = new Program(); 
             p.StartListening();
-
         }
 
         private void StartListening()
@@ -57,14 +65,36 @@ namespace Server
             }
         }
 
-        long lungImage = 230454;
+        
         private void elaborazione()
         {
-     
+            //abilito il calcolo
+            motionDetector.MotionLevelCalculation = true;
             //mi faccio mandare l'immagine
-            s.receiveFile(lungImage);
-            
+            System.Drawing.Bitmap current=s.receiveFile(lungImage);
+            processImage(current);
 
+        }
+        private void processImage(System.Drawing.Bitmap current)
+        {
+            if (lastFrame != null)
+            {
+                lastFrame.Dispose();
+            }
+
+            lastFrame = (System.Drawing.Bitmap)current.Clone();
+
+            // apply motion detector
+            if (motionDetector != null)
+            {
+                motionDetector.ProcessFrame(ref lastFrame);
+
+                // check motion level
+                if (motionDetector.MotionLevel >= alarmLevel)                    
+                {
+                    //funzione che esegue operazioni quando scatta allarme
+                }
+            }           
         }
     }
 }

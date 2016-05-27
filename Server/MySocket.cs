@@ -66,7 +66,7 @@ namespace Server
         {
             s.SendFile(fileName);
         }
-        public void receiveFile(long lung)
+        public Bitmap receiveFile(long lung)
         {
             byte[] buffer = new byte[lung];
           
@@ -88,7 +88,7 @@ namespace Server
              var image = (Image)imageConverter.ConvertFrom(buffer);
              Bitmap a =  new Bitmap(image);
              a.Save(@"C:\Users\Alfonso-LAPTOP\Desktop\image"+cont+".jpg");
-            cont++;
+             cont++;
             /*
             var ms = new MemoryStream();
             ms.Write(buffer, 0, (int)lung);
@@ -96,11 +96,10 @@ namespace Server
             Bitmap a = Bitmap.FromStream(ms;
             System.Drawing.Image image = Image.FromStream(ms);
             
-            image.Save(@"C:\Users\Alfonso-LAPTOP\Desktop\image.jpg");
-            */
+            image.Save(@"C:\Users\Alfonso-LAPTOP\Desktop\image.jpg");           */
           
 
-            return;
+            return a;
            
         }
     }

@@ -53,12 +53,8 @@ namespace Client
         }
 
         private void camera_BitmapStreamed(GTM.GHIElectronics.Camera sender, Bitmap e)
-        {
-            byte[] b_byte = new byte[e.Width * e.Height * 3 + 54];
-            System.Util.BitmapToBMPFile(e.GetBitmap(), e.Width, e.Height, b_byte);
-            GT.Picture b_picture = new GT.Picture(b_byte, GT.Picture.PictureEncoding.BMP);
-            displayT35.SimpleGraphics.DisplayImage(picture, 0, 0);
-    
+        {            
+            displayT35.SimpleGraphics.DisplayImage(e, 0, 0);    
            
         }
 

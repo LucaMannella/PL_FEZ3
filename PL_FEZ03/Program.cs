@@ -86,6 +86,7 @@ namespace PL_FEZ03
         void streamed(Camera sender, Microsoft.SPOT.Bitmap picture)
         {
             displayT35.SimpleGraphics.DisplayImage(picture, 0, 0);
+            
         }
     }
 }
