@@ -7,8 +7,9 @@ using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 using System.Threading;
 
-namespace PL_Server
+namespace Server
 {
+    // ciao!
     class Database
     {
         MySqlConnection myConn;
