@@ -14,11 +14,20 @@ using GTM = Gadgeteer.Modules;
 using System.Net.Sockets;
 using System.Net;
 using System.Text;
+using Gadgeteer.Modules.GHIElectronics;
+using Gadgeteer.SocketInterfaces;
+
+
+
+
 
 namespace Client
 {
     public partial class Program
     {
+        private AnalogInput pir_sensor;
+        private AnalogOutput buzzer_sensor;
+        private bool scatta_allarme = false;
         Bitmap bitmapA;
         Int32 RGlobal;
         // This method is run when the mainboard is powered up or reset.   
@@ -27,8 +36,17 @@ namespace Client
 
             // Use Debug.Print to show messages in Visual Studio's "Output" window during debugging.
             Debug.Print("Program Started");
-            Mainboard.SetDebugLED(true);
+            InitSensors();
+            GT.Timer timer_pir = new GT.Timer(1000);
+            timer_pir.Tick += PirDetection;
+            timer_pir.Start();       
+            
+
             SetupEthernet();
+
+            
+            
+            
             camera.PictureCaptured += camera_PictureCaptured;
             button.ButtonPressed += button_ButtonPressed;
             camera.BitmapStreamed += camera_BitmapStreamed;
@@ -37,6 +55,42 @@ namespace Client
             ethernetJ11D.NetworkDown += OnNetworkDown;
             camera.StartStreaming();
 
+        }
+
+        private void InitSensors()
+        {
+            Mainboard.SetDebugLED(true);
+            Gadgeteer.Socket socket = Gadgeteer.Socket.GetSocket(9, true, null, null);
+            pir_sensor = extender.CreateAnalogInput(Gadgeteer.Socket.Pin.Four);
+            buzzer_sensor = extender.CreateAnalogOutput(Gadgeteer.Socket.Pin.Five);
+            return;
+        }
+
+        private void ScattaAllarme()
+        {       
+            while (true)
+            {
+                buzzer_sensor.WriteProportion(1);
+                Thread.Sleep(1);
+                buzzer_sensor.WriteProportion(0);
+            }            
+        }
+
+        private void SpegniAllarme()
+        {
+            buzzer_sensor.WriteProportion(0);
+            return;
+        }
+
+
+
+        private void PirDetection(GT.Timer timer)
+        {
+            if (pir_sensor.ReadVoltage() > 3)
+            {
+                Debug.Print("beccato!!!");
+                //codice da eseguire quando scatta pir
+            }            
         }
 
         private void OnNetworkDown(GTM.Module.NetworkModule sender, GTM.Module.NetworkModule.NetworkState state)
