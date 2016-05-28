@@ -12,7 +12,7 @@ CLIENT SIDE - GADGETEER
 	7.1) Se il server/service è unreacheable segnalarlo			<--- da fare
 
  --- da aggiungere: ---
-1) aggiungere un volumetrico
+1) aggiungere un volumetrico				(fatto)
 2) funzione di inizializzazione
 
 
