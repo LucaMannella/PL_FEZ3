@@ -24,15 +24,20 @@ namespace Client
     {
         public const String DEFAULT_MY_IP = "192.168.137.2";
         public const String DEFAULT_DESTINATION_IP = "192.168.137.1";
+        public const String DEFAULT_PORT = "1500";
         public const String MASK = "255.255.255.0";
 
-        private AnalogInput pir_sensor;
-        private AnalogOutput buzzer_sensor;
+        IPEndPoint serverEndPoint = null;  // represent the connection with the server
+
+        private AnalogInput pir_sensor = null;
+        private AnalogOutput buzzer_sensor = null;
         private bool scatta_allarme = false;
 
         Bitmap bitmapA = null;
         Int32 RGlobal;
         Int32 PreviousAverage;
+
+        private volatile Boolean StopMe = false;
 
         /**
          * This method is run when the mainboard is powered up or reset.   
@@ -49,13 +54,13 @@ namespace Client
             
             SetupEthernet();
 
-            camera.PictureCaptured += camera_PictureCaptured;
-            button.ButtonPressed += button_ButtonPressed;
-            camera.BitmapStreamed += camera_BitmapStreamed;
-
             ethernetJ11D.UseThisNetworkInterface();
             ethernetJ11D.NetworkUp += OnNetworkUp;
             ethernetJ11D.NetworkDown += OnNetworkDown;
+
+            camera.PictureCaptured += camera_PictureCaptured;
+            camera.BitmapStreamed += camera_BitmapStreamed;
+            button.ButtonPressed += button_ButtonPressed;
 
             camera.StartStreaming();
         }
@@ -68,11 +73,6 @@ namespace Client
             ethernetJ11D.UseStaticIP(DEFAULT_MY_IP, MASK, DEFAULT_DESTINATION_IP);
         }
 
-        void SetupConnection(String MyIP, String Mask, String DestIp)
-        {
-            ethernetJ11D.UseStaticIP(MyIP, Mask, DestIp);
-        }
-
         /**
          * This method is triggered when the network goes up.
          */ 
@@ -83,8 +83,17 @@ namespace Client
             ListNetworkInterfaces();
 
             // implementare qui binding con il proxy
-            // 1) binding con ws
-            // 2) getAddressWithPort
+            String[] connectionInfo = {DEFAULT_DESTINATION_IP, DEFAULT_PORT};
+                // 1) binding con ws
+                // 2) getAddressWithPort
+
+            // Addressing
+            IPAddress ipAddress = IPAddress.Parse(connectionInfo[0]);
+            int port = int.Parse( connectionInfo[1] );
+            serverEndPoint = new IPEndPoint(ipAddress, port);     
+
+            // Starting keep alive thread
+            new Thread(this.keepAlive).Start();
         }
 
         /**
@@ -95,7 +104,21 @@ namespace Client
         {
             Debug.Print("Network down!");
             multicolorLED.TurnRed();
+            StopMe = true;      //stopping keep alive thread
             ScattaAllarme();
+        }
+
+        public void keepAlive()
+        {
+            Debug.Print("Keep Alive thread: starting...");
+
+            StopMe = false;
+            while (! StopMe)
+            {
+                // call keep alive service
+            }
+
+            Debug.Print("Keep Alive thread: terminating gracefully.");
         }
 // ----------------------- End Network & Connections ----------------------- //
 
@@ -275,32 +298,22 @@ namespace Client
 
         void sendPicture(byte[] e)
         {
-            using (Socket clientSocket = new Socket(AddressFamily.InterNetwork,
-            SocketType.Stream,
-            ProtocolType.Tcp))
-            {
-                // Addressing
-                IPAddress ipAddress = IPAddress.Parse(DEFAULT_DESTINATION_IP);
-                IPEndPoint serverEndPoint = new IPEndPoint(ipAddress, 1500);
-
+            Socket clientSocket = new Socket(
+                AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp );
+           
                 // Connecting
                 Debug.Print("Connecting to server " + serverEndPoint + ".");
-
                 clientSocket.Connect(serverEndPoint);
                 Debug.Print("Connected to server.");
 
-                // Sending
-
-                //byte[] messageBytes = Encoding.UTF8.GetBytes(e.GetBitmap());
                 clientSocket.Send(e);
                 clientSocket.Close();
-                /*
-                byte[] inBuffer = new byte[100];
+                
+/*              byte[] inBuffer = new byte[100];
                 int count = clientSocket.Receive(inBuffer);
                 char[] chars = Encoding.UTF8.GetChars(inBuffer);
                 string str = new string(chars, 0, count);
-                */
-            }
+*/
         }
 
 
