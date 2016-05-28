@@ -62,6 +62,20 @@ namespace Client
 
 
 // ------------------------- Network & Connections ------------------------- //
+        void SetupEthernet()
+        {
+            // ethernetJ11D.UseDHCP();
+            ethernetJ11D.UseStaticIP(DEFAULT_MY_IP, MASK, DEFAULT_DESTINATION_IP);
+        }
+
+        void SetupConnection(String MyIP, String Mask, String DestIp)
+        {
+            ethernetJ11D.UseStaticIP(MyIP, Mask, DestIp);
+        }
+
+        /**
+         * This method is triggered when the network goes up.
+         */ 
         private void OnNetworkUp(GTM.Module.NetworkModule sender, GTM.Module.NetworkModule.NetworkState state)
         {
             Debug.Print("Network up!");
@@ -73,21 +87,15 @@ namespace Client
             // 2) getAddressWithPort
         }
 
+        /**
+         * This method is triggered when the network goes down.
+         * It triggers the alarm.
+         */
         private void OnNetworkDown(GTM.Module.NetworkModule sender, GTM.Module.NetworkModule.NetworkState state)
         {
             Debug.Print("Network down!");
             multicolorLED.TurnRed();
-        }
-
-        void SetupEthernet()
-        {
-            // ethernetJ11D.UseDHCP();
-            ethernetJ11D.UseStaticIP(DEFAULT_MY_IP, MASK, DEFAULT_DESTINATION_IP);
-        }
-
-        void SetupConnection(String MyIP, String Mask, String DestIp)
-        {
-            ethernetJ11D.UseStaticIP(MyIP, Mask, DestIp);
+            ScattaAllarme();
         }
 // ----------------------- End Network & Connections ----------------------- //
 
@@ -128,13 +136,9 @@ namespace Client
         }
 // ------------------------------ End Sensori ------------------------------ //
 
-
-        private void camera_BitmapStreamed(GTM.GHIElectronics.Camera sender, Bitmap e)
-        {            
-            displayT35.SimpleGraphics.DisplayImage(e, 0, 0);    
-           
-        }
-
+        /**
+         * This method is triggered when the button is pressed.
+         */
         private void button_ButtonPressed(GTM.GHIElectronics.Button sender, GTM.GHIElectronics.Button.ButtonState state)
         {
             Debug.Print("Button pressed!");
@@ -144,29 +148,36 @@ namespace Client
             // invio della prima immagine
         }
 
+        private void camera_BitmapStreamed(GTM.GHIElectronics.Camera sender, Bitmap e)
+        {            
+            displayT35.SimpleGraphics.DisplayImage(e, 0, 0);    
+        }
+
+        /**
+         * This method is triggered when an image is caught.
+         */
         private void camera_PictureCaptured(GTM.GHIElectronics.Camera sender, GT.Picture picture)
         {
-            Int32 RB = 0;
+            Int32 HeurSum = 0;
             Bitmap bitmapB = picture.MakeBitmap();
 
             Debug.Print("Image captured! " +
                     "Size: " + picture.PictureData.Length.ToString());
 
-            //per gestire la prima volta
-            if (bitmapA == null)
+            if (bitmapA == null)    //per gestire la prima volta
             {
                 bitmapA = bitmapB;
-                RGlobal = euristicSum(bitmapA);
+                RGlobal = heuristicSum(bitmapA);
                 PreviousAverage = RGlobal / 9;
                 return;
             }
 
             Debug.Print(DateTime.Now.ToString());
-            RB = euristicSum(bitmapB);
+            HeurSum = heuristicSum(bitmapB);
             Debug.Print(DateTime.Now.ToString());
 
             Debug.Print(PreviousAverage.ToString());
-            Int32 average = (RB / 9);
+            Int32 average = (HeurSum / 9);
             Debug.Print(average.ToString());
 
             if (System.Math.Abs(PreviousAverage - average) > 45)    //SOGLIA LIMITE 40/50
@@ -175,30 +186,16 @@ namespace Client
                 sendPicture(picture.PictureData);
             }
 
-            RGlobal = RB;
+            RGlobal = HeurSum;
             PreviousAverage = average;
             displayT35.SimpleGraphics.DisplayImage(picture, 0, 0);
         } 
-
-        void ListNetworkInterfaces()
-        {
-            var settings = ethernetJ11D.NetworkSettings;
-
-            Debug.Print("------------------------------------------------");
-            // Debug.Print("MAC: " + ByteExtensions.ToHexString(settings.PhysicalAddress, "-"));
-            Debug.Print("IP Address:   " + settings.IPAddress);
-            Debug.Print("DHCP Enabled: " + settings.IsDhcpEnabled);
-            Debug.Print("Subnet Mask:  " + settings.SubnetMask);
-            Debug.Print("Gateway:      " + settings.GatewayAddress);
-            Debug.Print("------------------------------------------------");
-        }
-
 
         /**
          * This method sum the value of green of 9 squares
          * of dimension 8x8 taken from a bitmap.
          */
-        public Int32 euristicSum(Microsoft.SPOT.Bitmap bitmapB)
+        public Int32 heuristicSum(Microsoft.SPOT.Bitmap bitmapB)
         {
             Int32 RA = 0;
             for (int y = 0; y < 8; y++)
@@ -307,5 +304,23 @@ namespace Client
         }
 
 
+// --------------------------------- Debug --------------------------------- //
+        /**
+         * This method prints all the network interfaces.
+         */ 
+        void ListNetworkInterfaces()
+        {
+            var settings = ethernetJ11D.NetworkSettings;
+
+            Debug.Print("------------------------------------------------");
+            // Debug.Print("MAC: " + ByteExtensions.ToHexString(settings.PhysicalAddress, "-"));
+            Debug.Print("IP Address:   " + settings.IPAddress);
+            Debug.Print("DHCP Enabled: " + settings.IsDhcpEnabled);
+            Debug.Print("Subnet Mask:  " + settings.SubnetMask);
+            Debug.Print("Gateway:      " + settings.GatewayAddress);
+            Debug.Print("------------------------------------------------");
+        }
+
     }
+
 }
