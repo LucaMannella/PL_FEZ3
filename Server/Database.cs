@@ -11,8 +11,25 @@ namespace Server
 {
     class Database
     {
-        MySqlConnection myConn;
+        MySqlConnection myConn = null;
         bool connection_Opened = false;
+        private static Database myInstance = null;
+
+        private Database()
+        {
+
+        }
+
+        public static Database getInstance()
+        {
+            if (myInstance == null)
+            {
+                myInstance = new Database();
+            }
+
+            return myInstance;
+        }
+
 
         public bool OpenConnect()
         {

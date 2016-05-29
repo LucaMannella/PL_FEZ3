@@ -23,12 +23,14 @@ namespace Server
         private double alarmLevel = 0.005;
         private const string OK = "200OK\0";
         private long lasttime = 0;
+        private Database mDatabase;
 
         public ClientManager(String mac, int porta)
         {
             this.myMac = mac;
             this.porta = porta;
             this.motionDetector = new MotionDetector3Optimized();
+            this.mDatabase = Database.getInstance();
 
         }
 
@@ -39,7 +41,14 @@ namespace Server
             IPAddress ip = IPAddress.Parse("192.168.1.54");
             IPEndPoint localEndPoint = new IPEndPoint(ip, porta);
             Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-           
+
+            mDatabase.OpenConnect();
+            bool result = mDatabase.insertClient(this.myMac, this.porta);
+            mDatabase.CloseConnect();
+
+            if(!result){
+                Console.WriteLine("Error: Impossible to save new client in db");
+            }
 
             try
             {
