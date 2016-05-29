@@ -11,10 +11,12 @@ namespace FinalService
     [ServiceContract]
     public interface IService1
     {
+
         [OperationContract]
-        string checkImage(string value);
+        string[] getServerAddressWithPort(string myMacAddress);
 
-
+        [OperationContract]
+        Boolean keepAlive(string myMacAddress, string mycurrentTime, int port);
 
         // TODO: aggiungere qui le operazioni del servizio
     }

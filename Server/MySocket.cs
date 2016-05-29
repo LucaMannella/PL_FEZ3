@@ -102,5 +102,31 @@ namespace Server
             return a;
            
         }
+
+        public string receiveString()
+        {
+
+            byte[] buffer = new byte[1000];
+            int ricevuti = 0;
+            char vOut ='a';
+            while (vOut != '\0')
+            {
+                ricevuti += s.Receive(buffer, ricevuti, 1, SocketFlags.None);
+                vOut = Convert.ToChar(buffer[ricevuti-1]);
+
+            }
+
+            byte[] buf = new byte[ricevuti];
+
+            for (int i = 0; i < ricevuti-1; i++)
+            {
+                buf[i] = buffer[i];
+            }
+
+            return System.Text.Encoding.UTF8.GetString(buf);
+        }
+
+
+      
     }
 }

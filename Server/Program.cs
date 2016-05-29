@@ -12,14 +12,12 @@ namespace Server
     class Program
     {
         MySocket s;
-        MotionDetector3Optimized motionDetector = new MotionDetector3Optimized();
-        //oppure usare:
-        //MotionDetector4 motionDetector = new MotionDetector4();
-        System.Drawing.Bitmap lastFrame = null;
-        //grandezza immagine che mi aspetto di ricevere
-        long lungImage = 230454;
-        //livello che dice quando far scattare allarme ed è compreso tra 0 e 1
-        private double alarmLevel = 0.005;
+
+        private static string IPADDR = "192.168.1.54";
+        private int startingport = 1501;
+        private int progressiveport = 0;
+        private const string OK = "200OK\0";
+
         
         static void Main(string[] args)
         {
@@ -29,8 +27,8 @@ namespace Server
 
         private void StartListening()
         {
-            Socket handler;            
-            IPAddress ip = IPAddress.Parse("192.168.137.1");
+            Socket handler;
+            IPAddress ip = IPAddress.Parse(IPADDR);
             IPEndPoint localEndPoint = new IPEndPoint(ip, 1500);
             //IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, 1500);            
             // Create a TCP/IP socket.
@@ -49,8 +47,8 @@ namespace Server
                     // Program is suspended while waiting for an incoming connection.
                     handler = listener.Accept();                    
                    
-                    s = new MySocket(handler);                    
-                    ThreadStart threadDelegate = new ThreadStart(elaborazione);
+                    s = new MySocket(handler);
+                    ThreadStart threadDelegate = new ThreadStart(manageCommand);
                     Thread newThread = new Thread(threadDelegate);
                     newThread.Start();
                      
@@ -65,36 +63,67 @@ namespace Server
             }
         }
 
-        
-        private void elaborazione()
-        {
-            //abilito il calcolo
-            motionDetector.MotionLevelCalculation = true;
-            //mi faccio mandare l'immagine
-            System.Drawing.Bitmap current=s.receiveFile(lungImage);
-            processImage(current);
 
-        }
-        private void processImage(System.Drawing.Bitmap current)
-        {
-            if (lastFrame != null)
+
+        private void manageCommand(){
+            String cmd = s.receiveString();
+            switch (cmd)
             {
-                lastFrame.Dispose();
+                case "getPort\0":
+                    Console.WriteLine(cmd);
+                    String macaddr = s.receiveString();
+                    Console.WriteLine(macaddr);
+
+                    int port = startingport + progressiveport;
+                    progressiveport++;
+
+                    Thread thread = new Thread(() => manageNewClient(macaddr, port));
+                    thread.Start();
+
+                    
+                    sendPort(port);
+
+                    break;
+                case "keepAlive\0":
+                    Console.WriteLine(cmd);
+                    String macaddr2 = s.receiveString();
+                    String time = s.receiveString();
+                    Console.WriteLine("Received keepalive from: "+ macaddr2 + "at: " +time);
+
+                    //TODO check keepalive
+
+                    byte[] toSend = System.Text.Encoding.UTF8.GetBytes(OK);
+                    s.Send(toSend, toSend.Length, SocketFlags.None);
+                    break;
+                default:
+                    break;
             }
+            
 
-            lastFrame = (System.Drawing.Bitmap)current.Clone();
-
-            // apply motion detector
-            if (motionDetector != null)
-            {
-                motionDetector.ProcessFrame(ref lastFrame);
-
-                // check motion level
-                if (motionDetector.MotionLevel >= alarmLevel)                    
-                {
-                    //funzione che esegue operazioni quando scatta allarme
-                }
-            }           
         }
+
+        private void sendPort(int port)
+        {
+            string myString = port.ToString() + '\0';
+
+
+            byte[] toSend = System.Text.Encoding.UTF8.GetBytes(myString);
+
+
+            s.Send(toSend, toSend.Length, SocketFlags.None);
+
+        }
+
+        private void manageNewClient(string macaddr, int port)
+        {
+            ClientManager client = new ClientManager(macaddr, port);
+            client.start();
+
+        }
+
+       
+
+
+  
     }
 }
