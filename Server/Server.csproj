@@ -50,6 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClientManager.cs" />
     <Compile Include="Database.cs" />
     <Compile Include="IMotionDetector.cs" />
     <Compile Include="MotionDetector3Optimized.cs" />
