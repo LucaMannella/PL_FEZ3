@@ -1,30 +1,34 @@
-CLIENT SIDE - GADGETEER
+﻿CLIENT SIDE - GADGETEER
 ------------------------------------------------------------
-1) Richiesta al WS della porta su cui comunicare con il server	<--- da fare
+1) Richiesta al WS della porta su cui comunicare con il server		<--- da fare
 2) Setup 								<--- da fare
-3) Rilevare immagini dalla fotocamera 		(fatto)
-4) Algoritmo per le differenze tra i frame	(fatto)
-5) Inviare un'immagine al server			(fatto)
+3) Rilevare immagini dalla fotocamera 					(fatto)
+4) Algoritmo per le differenze tra i frame				(fatto)
+5) Inviare un'immagine al server					(fatto)
 6) Risposta								<--- da fare
 	6a) ok
 	6b) allarme
-7) Ogni x secondi il client manda un keep alive					<--- da fare
-	7.1) Se il server/service è unreacheable segnalarlo			<--- da fare
+7) Ogni x secondi il client manda un keep alive				<--- da fare
+	7.1) Se il server/service è unreacheable segnalarlo		<--- da fare
 
  --- da aggiungere: ---
-1) aggiungere un volumetrico				(fatto)
+1) aggiungere un volumetrico
 2) funzione di inizializzazione
 
 
 SERVER SIDE
 ------------------------------------------------------------
-1) Gestisco richiesta del WS				<--- da fare
-	1.1) Listening del socket				<--- da fare
-	1.2) Memorizzare l'immagine iniziale	<--- da fare
-	1.3) Ricevere immagini ed elaboro				
-	1.4) Memorizzare immagini sul database	<--- da fare
-	1.5) Inviare risposta ai client			<--- da fare
-	1.6) Inviare e-mail all'utente			<--- da fare
+1) Gestisco richieste del WS						(fatto)
+	1.1) Nuovo client getPort					(fatto)
+		1.1.1) Memorizzare mac address dei client sul db	<--- da fare
+	1.2) Keep Alive							(fatto)
+	
+2) Listening sul socket client						(fatto)
+	2.1) Memorizzare l'immagine iniziale				<--- da fare
+	2.2) Ricevere immagini ed elaboro				(fatto)		
+	2.3) Memorizzare immagini sul database				<--- da fare
+	2.4) Inviare risposta ai client					<--- da fare
+	2.5) Inviare e-mail all'utente					<--- da fare
 
 da aggiungere:
 1) web application
@@ -33,9 +37,8 @@ da aggiungere:
 
 Web Service
 ------------------------------------------------------------
-1) Ricezione richiesta porta comunicazione client-server	<--- da fare
-	1.1) Memorizzare mac address dei client sul db			<--- da fare
-	1.2) Chiedere al server la porta						<--- da fare
-	1.3) Inoltrare porta al client							<--- da fare
-2) Keep alive												<--- da fare
-	2.1) Segnalare al server che il client è down			<--- da fare
+1) Ricezione richiesta porta comunicazione client-server		(fatto)
+	1.2) Chiedere al server la porta				(fatto)
+	1.3) Inoltrare porta al client					(fatto)
+2) Keep alive								(fatto)
+	
