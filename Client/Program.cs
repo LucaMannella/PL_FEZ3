@@ -37,7 +37,7 @@ namespace Client
         Int32 RGlobal;
         Int32 PreviousAverage;
 
-        private volatile Boolean StopMe = false;
+        private Boolean StopMe = false;
 
         /**
          * This method is run when the mainboard is powered up or reset.   
