@@ -7,7 +7,8 @@ using Microsoft.SPOT.Presentation.Controls;
 using Microsoft.SPOT.Presentation.Media;
 using Microsoft.SPOT.Presentation.Shapes;
 using Microsoft.SPOT.Touch;
-
+using Microsoft.SPOT.Net.NetworkInformation;
+using tempuri.org;
 using Gadgeteer.Networking;
 using GT = Gadgeteer;
 using GTM = Gadgeteer.Modules;
@@ -16,6 +17,8 @@ using System.Net;
 using System.Text;
 using Gadgeteer.Modules.GHIElectronics;
 using Gadgeteer.SocketInterfaces;
+using Ws.Services.Binding;
+using Ws.Services;
 
 
 namespace Client
@@ -26,13 +29,20 @@ namespace Client
         public const String DEFAULT_DESTINATION_IP = "192.168.137.1";
         public const String DEFAULT_PORT = "1500";
         public const String MASK = "255.255.255.0";
+        public const String SERVICE_ADDR = "http://192.168.137.1:8733/Service/";
+        public const String MANAGE_IMAGE_COMMAND = "manageImage\0";
+        String[] connectionInfo = { DEFAULT_DESTINATION_IP, DEFAULT_PORT };
+
+        long servertime = 0;
+        
+        IService1ClientProxy proxy;
 
         IPEndPoint serverEndPoint = null;  // represent the connection with the server
 
         private AnalogInput pir_sensor = null;
         private AnalogOutput buzzer_sensor = null;
         private bool scatta_allarme = false;
-
+        private string myMac;
         Bitmap bitmapA = null;
         Int32 RGlobal;
         Int32 PreviousAverage;
@@ -47,14 +57,11 @@ namespace Client
             Debug.Print("Program Started");     // to show messages in "Output" window during debugging
             Mainboard.SetDebugLED(true);
 
+
             InitSensors();
-            GT.Timer timer_pir = new GT.Timer(1000);
-            timer_pir.Tick += PirDetection;
-            timer_pir.Start();       
             
             SetupEthernet();
 
-            ethernetJ11D.UseThisNetworkInterface();
             ethernetJ11D.NetworkUp += OnNetworkUp;
             ethernetJ11D.NetworkDown += OnNetworkDown;
 
@@ -63,14 +70,20 @@ namespace Client
             button.ButtonPressed += button_ButtonPressed;
 
             camera.StartStreaming();
+
+           
+
+            GT.Timer timer_pir = new GT.Timer(5000);
+            timer_pir.Tick += PirDetection;
+            timer_pir.Start();   
         }
 
 
 // ------------------------- Network & Connections ------------------------- //
         void SetupEthernet()
         {
-            // ethernetJ11D.UseDHCP();
             ethernetJ11D.UseStaticIP(DEFAULT_MY_IP, MASK, DEFAULT_DESTINATION_IP);
+            ethernetJ11D.UseThisNetworkInterface();
         }
 
         /**
@@ -82,10 +95,10 @@ namespace Client
             multicolorLED.TurnGreen();
             ListNetworkInterfaces();
 
-            // implementare qui binding con il proxy
-            String[] connectionInfo = {DEFAULT_DESTINATION_IP, DEFAULT_PORT};
-                // 1) binding con ws
-                // 2) getAddressWithPort
+            bindProxyService();
+            
+            getAddressAndPort();
+
 
             // Addressing
             IPAddress ipAddress = IPAddress.Parse(connectionInfo[0]);
@@ -93,7 +106,36 @@ namespace Client
             serverEndPoint = new IPEndPoint(ipAddress, port);     
 
             // Starting keep alive thread
-            new Thread(this.keepAlive).Start();
+         //   new Thread(this.keepAlive).Start();
+        }
+
+      
+
+        private void bindProxyService()
+        {
+            Debug.Print("Binding proxy service...");
+             proxy = new IService1ClientProxy(new WS2007HttpBinding(),new ProtocolVersion11());
+
+            // NOTE: the endpoint needs to match the endpoint of the servicehost
+             proxy.EndpointAddress = SERVICE_ADDR;
+
+            Debug.Print("Binding proxy service COMPLETE");
+
+        }
+
+        private void getAddressAndPort()
+        {
+            var data = proxy.getServerAddressWithPort(new getServerAddressWithPort()
+            {
+                myMacAddress = myMac,
+
+            });
+            connectionInfo[0] = data.getServerAddressWithPortResult.address;
+            connectionInfo[1] = data.getServerAddressWithPortResult.port;
+            Debug.Print("Server address: " + data.getServerAddressWithPortResult.address);
+            Debug.Print("Server port: " + data.getServerAddressWithPortResult.port);
+            servertime = Int64.Parse(data.getServerAddressWithPortResult.serverTime);
+            Debug.Print("Server time: " + servertime);
         }
 
         /**
@@ -105,7 +147,7 @@ namespace Client
             Debug.Print("Network down!");
             multicolorLED.TurnRed();
             StopMe = true;      //stopping keep alive thread
-            ScattaAllarme();
+           // ScattaAllarme();
         }
 
         public void keepAlive()
@@ -130,7 +172,6 @@ namespace Client
             Gadgeteer.Socket socket = Gadgeteer.Socket.GetSocket(9, true, null, null);
             pir_sensor = extender.CreateAnalogInput(Gadgeteer.Socket.Pin.Four);
             buzzer_sensor = extender.CreateAnalogOutput(Gadgeteer.Socket.Pin.Five);
-            return;
         }
 
         private void ScattaAllarme()
@@ -183,7 +224,7 @@ namespace Client
         {
             Int32 HeurSum = 0;
             Bitmap bitmapB = picture.MakeBitmap();
-
+            
             Debug.Print("Image captured! " +
                     "Size: " + picture.PictureData.Length.ToString());
 
@@ -305,7 +346,9 @@ namespace Client
                 Debug.Print("Connecting to server " + serverEndPoint + ".");
                 clientSocket.Connect(serverEndPoint);
                 Debug.Print("Connected to server.");
+                byte[] cmd = Encoding.UTF8.GetBytes(MANAGE_IMAGE_COMMAND);
 
+                clientSocket.Send(cmd);
                 clientSocket.Send(e);
                 clientSocket.Close();
                 
@@ -324,9 +367,10 @@ namespace Client
         void ListNetworkInterfaces()
         {
             var settings = ethernetJ11D.NetworkSettings;
+            myMac = ByteExtensions.ToHexString(settings.PhysicalAddress, "-");
 
             Debug.Print("------------------------------------------------");
-            // Debug.Print("MAC: " + ByteExtensions.ToHexString(settings.PhysicalAddress, "-"));
+            Debug.Print("MAC: " + ByteExtensions.ToHexString(settings.PhysicalAddress, "-"));
             Debug.Print("IP Address:   " + settings.IPAddress);
             Debug.Print("DHCP Enabled: " + settings.IsDhcpEnabled);
             Debug.Print("Subnet Mask:  " + settings.SubnetMask);

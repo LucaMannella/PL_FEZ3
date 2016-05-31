@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Service;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -13,7 +14,7 @@ namespace FinalService
     {
 
         [OperationContract]
-        string[] getServerAddressWithPort(string myMacAddress);
+        AddressResponse getServerAddressWithPort(string myMacAddress);
 
         [OperationContract]
         Boolean keepAlive(string myMacAddress, string mycurrentTime, int port);

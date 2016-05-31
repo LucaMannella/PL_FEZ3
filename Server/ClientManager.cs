@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Mail;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -38,7 +39,7 @@ namespace Server
         public void start()
         {
             Socket handlerClient;
-            IPAddress ip = IPAddress.Parse("192.168.1.54");
+            IPAddress ip = IPAddress.Parse("192.168.137.1");
             IPEndPoint localEndPoint = new IPEndPoint(ip, porta);
             Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
@@ -86,7 +87,7 @@ namespace Server
                             clientsock.Close();
                             break;
 
-                        case "manageImage\0":
+                        case "manageImageBM6�\0":
 
                             Thread thread = new Thread(() => elaborazione(clientsock));
                             thread.Start();
@@ -162,6 +163,30 @@ namespace Server
                     //funzione che esegue operazioni quando scatta allarme
                 }
             }
+        }
+
+        private void sendMail(String subject, String message)
+        {
+            var fromAddress = new MailAddress("fez03noreply@gmail.com", "From Name");
+            var toAddress = new MailAddress("valenzise@tiscali.it", "To Name");
+            String fromPassword = "fez03password";
+            
+            var smtp = new SmtpClient
+            {
+                Host = "smtp.gmail.com",
+                Port = 587,
+                EnableSsl = true,
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                UseDefaultCredentials = false,
+                Credentials = new NetworkCredential(fromAddress.Address, fromPassword)
+            };
+
+            MailMessage mymailmex = new MailMessage(fromAddress, toAddress);
+            mymailmex.Subject = subject;
+            mymailmex.Body = message;
+
+            smtp.Send(mymailmex);
+            
         }
 
     }
