@@ -38,7 +38,7 @@ namespace tempuri.org
 
             // Set base service properties
             ServiceNamespace = new WsXmlNamespace("ise", "http://tempuri.org/");
-            ServiceID = "urn:uuid:f81f4b62-e4d1-43d3-9656-b9503408a314";
+            ServiceID = "urn:uuid:fb465e1b-c234-4c7a-a20c-8e7b97d4f687";
             ServiceTypeName = "IService1";
 
             // Add service types here

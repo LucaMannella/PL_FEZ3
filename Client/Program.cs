@@ -20,7 +20,6 @@ using Gadgeteer.SocketInterfaces;
 using Ws.Services.Binding;
 using Ws.Services;
 
-
 namespace Client
 {
     public partial class Program
@@ -30,7 +29,9 @@ namespace Client
         public const String DEFAULT_PORT = "1500";
         public const String MASK = "255.255.255.0";
         public const String SERVICE_ADDR = "http://192.168.137.1:8733/Service/";
-        public const String MANAGE_IMAGE_COMMAND = "manageImage\0";
+        public const String KEEP_ALIVE_COMMAND = "keepAlive-";
+        public const String MANAGE_IMAGE_COMMAND = "manageImage-";
+        public const String FIRST_IMAGE_COMMAND = "firstImage-";
         String[] connectionInfo = { DEFAULT_DESTINATION_IP, DEFAULT_PORT };
 
         long servertime = 0;
@@ -71,8 +72,6 @@ namespace Client
 
             camera.StartStreaming();
 
-           
-
             GT.Timer timer_pir = new GT.Timer(5000);
             timer_pir.Tick += PirDetection;
             timer_pir.Start();   
@@ -103,10 +102,38 @@ namespace Client
             // Addressing
             IPAddress ipAddress = IPAddress.Parse(connectionInfo[0]);
             int port = int.Parse( connectionInfo[1] );
-            serverEndPoint = new IPEndPoint(ipAddress, port);     
+            serverEndPoint = new IPEndPoint(ipAddress, port);
+
+            GT.Timer timer_pir = new GT.Timer(10000);
+            timer_pir.Tick += keepAlive;
+            timer_pir.Start();
+
 
             // Starting keep alive thread
          //   new Thread(this.keepAlive).Start();
+        }
+
+        private void takePicture(GT.Timer timer)
+        {
+            if(camera.CameraReady)
+                camera.TakePicture();
+        }
+
+        private void keepAlive(GT.Timer timer)
+        {
+            Debug.Print("Keep Alive !");
+            servertime += 10000;
+            //TODO gestire eccezione
+            var data = proxy.keepAlive(new keepAlive()
+            {
+                myMacAddress = myMac,
+                mycurrentTime = servertime,
+                port = int.Parse(connectionInfo[1]),
+
+            });
+
+            Debug.Print("keepAlive return: " +data.keepAliveResult.ToString());
+            
         }
 
       
@@ -125,6 +152,7 @@ namespace Client
 
         private void getAddressAndPort()
         {
+            //TODO gestire eccezione
             var data = proxy.getServerAddressWithPort(new getServerAddressWithPort()
             {
                 myMacAddress = myMac,
@@ -134,7 +162,7 @@ namespace Client
             connectionInfo[1] = data.getServerAddressWithPortResult.port;
             Debug.Print("Server address: " + data.getServerAddressWithPortResult.address);
             Debug.Print("Server port: " + data.getServerAddressWithPortResult.port);
-            servertime = Int64.Parse(data.getServerAddressWithPortResult.serverTime);
+            servertime = data.getServerAddressWithPortResult.serverTime;
             Debug.Print("Server time: " + servertime);
         }
 
@@ -150,18 +178,7 @@ namespace Client
            // ScattaAllarme();
         }
 
-        public void keepAlive()
-        {
-            Debug.Print("Keep Alive thread: starting...");
-
-            StopMe = false;
-            while (! StopMe)
-            {
-                // call keep alive service
-            }
-
-            Debug.Print("Keep Alive thread: terminating gracefully.");
-        }
+       
 // ----------------------- End Network & Connections ----------------------- //
 
 
@@ -208,7 +225,11 @@ namespace Client
             Debug.Print("Button pressed!");
             camera.StopStreaming();
             camera.TakePicture();
-
+            /*
+            GT.Timer timer_getimage = new GT.Timer(5000);
+            timer_getimage.Tick += takePicture;
+            timer_getimage.Start();  
+            */
             // invio della prima immagine
         }
 
@@ -233,6 +254,7 @@ namespace Client
                 bitmapA = bitmapB;
                 RGlobal = heuristicSum(bitmapA);
                 PreviousAverage = RGlobal / 9;
+                sendPicture(picture.PictureData, true);
                 return;
             }
 
@@ -247,7 +269,7 @@ namespace Client
             if (System.Math.Abs(PreviousAverage - average) > 45)    //SOGLIA LIMITE 40/50
             {
                 Debug.Print("Suspicious picture!");
-                sendPicture(picture.PictureData);
+                sendPicture(picture.PictureData, false);
             }
 
             RGlobal = HeurSum;
@@ -337,7 +359,7 @@ namespace Client
             return RA;
         }
 
-        void sendPicture(byte[] e)
+        void sendPicture(byte[] e,Boolean first)
         {
             Socket clientSocket = new Socket(
                 AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp );
@@ -346,10 +368,24 @@ namespace Client
                 Debug.Print("Connecting to server " + serverEndPoint + ".");
                 clientSocket.Connect(serverEndPoint);
                 Debug.Print("Connected to server.");
-                byte[] cmd = Encoding.UTF8.GetBytes(MANAGE_IMAGE_COMMAND);
+                byte[] cmd;
+
+                if (first)
+                {
+                    cmd = Encoding.UTF8.GetBytes(FIRST_IMAGE_COMMAND);
+                }
+                else
+                {
+                    cmd = Encoding.UTF8.GetBytes(MANAGE_IMAGE_COMMAND);
+                }
+               
 
                 clientSocket.Send(cmd);
                 clientSocket.Send(e);
+
+                String response = reciveResponse(clientSocket);
+                Debug.Print(response);
+
                 clientSocket.Close();
                 
 /*              byte[] inBuffer = new byte[100];
@@ -357,6 +393,28 @@ namespace Client
                 char[] chars = Encoding.UTF8.GetChars(inBuffer);
                 string str = new string(chars, 0, count);
 */
+        }
+
+        private string reciveResponse(Socket clientSocket)
+        {
+            byte[] buffer = new byte[1000];
+            int ricevuti = 0;
+            char vOut = 'a';
+            while (vOut != '-')
+            {
+                ricevuti += clientSocket.Receive(buffer, ricevuti, 1, SocketFlags.None);
+                vOut = Convert.ToChar(buffer[ricevuti - 1]);
+
+            }
+
+            byte[] buf = new byte[ricevuti];
+
+            for (int i = 0; i < ricevuti - 1; i++)
+            {
+                buf[i] = buffer[i];
+            }
+
+            return new string(Encoding.UTF8.GetChars(buf));
         }
 
 

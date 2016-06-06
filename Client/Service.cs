@@ -137,8 +137,8 @@ namespace tempuri.org
         [DataMember(Order=0, IsNillable=true, IsRequired=false)]
         public string myMacAddress;
         
-        [DataMember(Order=1, IsNillable=true, IsRequired=false)]
-        public string mycurrentTime;
+        [DataMember(Order=1, IsRequired=false)]
+        public long mycurrentTime;
         
         [DataMember(Order=2, IsRequired=false)]
         public int port;
@@ -170,10 +170,10 @@ namespace tempuri.org
                     keepAliveField.myMacAddress = reader.ReadString();
                     reader.ReadEndElement();
                 }
-                if (IsChildStartElement(reader, "mycurrentTime", true, false))
+                if (IsChildStartElement(reader, "mycurrentTime", false, false))
                 {
                     reader.Read();
-                    keepAliveField.mycurrentTime = reader.ReadString();
+                    keepAliveField.mycurrentTime = XmlConvert.ToInt64(reader.ReadString());
                     reader.ReadEndElement();
                 }
                 if (IsChildStartElement(reader, "port", false, false))
@@ -197,9 +197,9 @@ namespace tempuri.org
                     writer.WriteString(keepAliveField.myMacAddress);
                     writer.WriteEndElement();
                 }
-                if (WriteChildElement(writer, "mycurrentTime", true, false, keepAliveField.mycurrentTime))
+                if (WriteChildElement(writer, "mycurrentTime", false, false, keepAliveField.mycurrentTime))
                 {
-                    writer.WriteString(keepAliveField.mycurrentTime);
+                    writer.WriteString(XmlConvert.ToString(keepAliveField.mycurrentTime));
                     writer.WriteEndElement();
                 }
                 if (WriteChildElement(writer, "port", false, false, keepAliveField.port))
@@ -294,8 +294,8 @@ namespace schemas.datacontract.org.Service
         [DataMember(Order=1, IsNillable=true, IsRequired=false)]
         public string port;
         
-        [DataMember(Order=2, IsNillable=true, IsRequired=false)]
-        public string serverTime;
+        [DataMember(Order=2, IsRequired=false)]
+        public long serverTime;
     }
     
     public class AddressResponseDataContractSerializer : DataContractSerializer
@@ -330,10 +330,10 @@ namespace schemas.datacontract.org.Service
                     AddressResponseField.port = reader.ReadString();
                     reader.ReadEndElement();
                 }
-                if (IsChildStartElement(reader, "serverTime", true, false))
+                if (IsChildStartElement(reader, "serverTime", false, false))
                 {
                     reader.Read();
-                    AddressResponseField.serverTime = reader.ReadString();
+                    AddressResponseField.serverTime = XmlConvert.ToInt64(reader.ReadString());
                     reader.ReadEndElement();
                 }
                 reader.ReadEndElement();
@@ -356,9 +356,9 @@ namespace schemas.datacontract.org.Service
                     writer.WriteString(AddressResponseField.port);
                     writer.WriteEndElement();
                 }
-                if (WriteChildElement(writer, "serverTime", true, false, AddressResponseField.serverTime))
+                if (WriteChildElement(writer, "serverTime", false, false, AddressResponseField.serverTime))
                 {
-                    writer.WriteString(AddressResponseField.serverTime);
+                    writer.WriteString(XmlConvert.ToString(AddressResponseField.serverTime));
                     writer.WriteEndElement();
                 }
                 writer.WriteEndElement();
