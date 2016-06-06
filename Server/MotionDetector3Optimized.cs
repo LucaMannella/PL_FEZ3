@@ -36,6 +36,10 @@ namespace Server
             set { calculateMotionLevel = value; }
         }
 
+        public byte[] BackgroundFrame
+        {
+            set { backgroundFrame = value; }
+        }
         // Motion level - amount of changes in percents
         public double MotionLevel
         {

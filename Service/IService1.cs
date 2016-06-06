@@ -17,7 +17,7 @@ namespace FinalService
         AddressResponse getServerAddressWithPort(string myMacAddress);
 
         [OperationContract]
-        Boolean keepAlive(string myMacAddress, string mycurrentTime, int port);
+        Boolean keepAlive(string myMacAddress, long mycurrentTime, int port);
 
         // TODO: aggiungere qui le operazioni del servizio
     }

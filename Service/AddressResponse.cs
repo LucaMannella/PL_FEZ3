@@ -15,10 +15,10 @@ namespace Service
         [DataMember]
         public String port;
         [DataMember]
-        public String serverTime;
+        public long serverTime;
 
         
-        public AddressResponse(String address, String port, String time)
+        public AddressResponse(String address, String port, long time)
         {
             this.address = address;
             this.port = port;

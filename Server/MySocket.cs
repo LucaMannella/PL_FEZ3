@@ -14,7 +14,7 @@ namespace Server
 {
     class MySocket
     {
-        private Socket s;
+        public Socket s;
         private int cont = 0;
 
         public MySocket(Socket s)
@@ -72,9 +72,9 @@ namespace Server
           
             
             long totRicevuti = 0;
-            int ricevuti=0;
-            long mancanti;
-            while ((mancanti = lung - totRicevuti) > 0)
+            int ricevuti=-1;
+            long mancanti = lung - totRicevuti;
+            while ((mancanti = lung - totRicevuti) > 0 )
             {
                 if (mancanti >= lung)
                     ricevuti = s.Receive(buffer, (int) lung, SocketFlags.None);
