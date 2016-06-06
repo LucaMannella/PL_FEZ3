@@ -40,9 +40,12 @@ namespace Client
 
         IPEndPoint serverEndPoint = null;  // represent the connection with the server
 
-        private AnalogInput pir_sensor = null;
-        private AnalogOutput buzzer_sensor = null;
+        private DigitalInput pir_sensor = null;
+        private PwmOutput buzzer_sensor = null;
         private bool scatta_allarme = false;
+        private PwmOutput movimento_orizzontale=null,movimento_verticale=null;
+        private Joystick.Position joystickPosition;
+        private double current_orizzontal_pos = 0, current_vertical_pos=0;
         private string myMac;
         Bitmap bitmapA = null;
         Int32 RGlobal;
@@ -58,7 +61,7 @@ namespace Client
             Debug.Print("Program Started");     // to show messages in "Output" window during debugging
             Mainboard.SetDebugLED(true);
 
-
+            Thread.Sleep(10000);
             InitSensors();
             
             SetupEthernet();
@@ -72,9 +75,14 @@ namespace Client
 
             camera.StartStreaming();
 
+            GT.Timer timer_joystick = new GT.Timer(100);
+            timer_joystick.Tick += joystick_function;
+            timer_joystick.Start();
+
+
             GT.Timer timer_pir = new GT.Timer(5000);
             timer_pir.Tick += PirDetection;
-            timer_pir.Start();   
+            //timer_pir.Start();   
         }
 
 
@@ -104,13 +112,52 @@ namespace Client
             int port = int.Parse( connectionInfo[1] );
             serverEndPoint = new IPEndPoint(ipAddress, port);
 
-            GT.Timer timer_pir = new GT.Timer(10000);
-            timer_pir.Tick += keepAlive;
-            timer_pir.Start();
+            
+            GT.Timer timer_keepAlive = new GT.Timer(10000);
+            timer_keepAlive.Tick += keepAlive;
+            //timer_keepAlive.Start();
 
 
             // Starting keep alive thread
          //   new Thread(this.keepAlive).Start();
+        }
+
+        private void joystick_function(GT.Timer timer)
+        {
+            double realX = 0, realY = 0;
+            Joystick.Position newJoystickPosition = joystick.GetPosition();
+            double newX = joystickPosition.X;
+            double newY = joystickPosition.Y;
+            joystickPosition = newJoystickPosition;
+
+
+            // did we actually move...
+            if (System.Math.Abs(newX) >= 0.05) 
+            {
+                realX = newX;
+            }
+            if (System.Math.Abs(newY) >= 0.05)
+            {
+                realY = newY;
+            }
+            if (realX == 0.0 && realY == 0.0) 
+                return;
+            if(System.Math.Abs(newX)>=System.Math.Abs(newY))
+            {
+                if (current_orizzontal_pos + realX / 80 <= 0.1 && current_orizzontal_pos + realX / 80 >= 0.05)
+                {
+                    movimento_orizzontale.Set(50, current_orizzontal_pos + realX / 80);
+                    current_orizzontal_pos = current_orizzontal_pos + realX / 80;
+                }                
+            }
+            else
+            {
+                if (current_vertical_pos + realY / 80 <= 0.1 && current_vertical_pos + realY / 80 >= 0.05)
+                {
+                    movimento_verticale.Set(50, current_vertical_pos + realY / 80);
+                    current_vertical_pos = current_vertical_pos + realY / 80;
+                }                
+            }
         }
 
         private void takePicture(GT.Timer timer)
@@ -186,30 +233,41 @@ namespace Client
         private void InitSensors()
         {
             Mainboard.SetDebugLED(true);
-            Gadgeteer.Socket socket = Gadgeteer.Socket.GetSocket(9, true, null, null);
-            pir_sensor = extender.CreateAnalogInput(Gadgeteer.Socket.Pin.Four);
-            buzzer_sensor = extender.CreateAnalogOutput(Gadgeteer.Socket.Pin.Five);
+            Gadgeteer.Socket socket = Gadgeteer.Socket.GetSocket(8, true, null, null);
+            pir_sensor = extender.CreateDigitalInput(Gadgeteer.Socket.Pin.Four,GlitchFilterMode.Off,ResistorMode.Disabled);
+            buzzer_sensor = extender.CreatePwmOutput(Gadgeteer.Socket.Pin.Nine);
+            movimento_orizzontale = extender.CreatePwmOutput(Gadgeteer.Socket.Pin.Seven);
+            movimento_verticale = extender.CreatePwmOutput(Gadgeteer.Socket.Pin.Eight);
+            current_orizzontal_pos = 0.075;
+            current_vertical_pos = 0.075;
+            movimento_orizzontale.Set(50, current_orizzontal_pos);
+            Thread.Sleep(1000);
+            movimento_verticale.Set(50, current_vertical_pos);
         }
 
         private void ScattaAllarme()
         {       
             while (true)
             {
-                buzzer_sensor.WriteProportion(1);
-                Thread.Sleep(1);
-                buzzer_sensor.WriteProportion(0);
+                for (int i = 0; i < 10; i++)
+                {
+                    buzzer_sensor.Set(500, 0.5);
+                    Thread.Sleep(1000);
+                    buzzer_sensor.Set(1000, 0.5);
+                    Thread.Sleep(1000);
+                }                    
             }            
         }
 
         private void SpegniAllarme()
         {
-            buzzer_sensor.WriteProportion(0);
+            buzzer_sensor.IsActive = false;
             return;
         }
 
         private void PirDetection(GT.Timer timer)
         {
-            if (pir_sensor.ReadVoltage() > 3)
+            if (pir_sensor.Read())
             {
                 Debug.Print("beccato!!!");
                 //codice da eseguire quando scatta pir

@@ -33,8 +33,11 @@ namespace Client {
         /// <summary>The Ethernet J11D module using socket 7 of the mainboard.</summary>
         private Gadgeteer.Modules.GHIElectronics.EthernetJ11D ethernetJ11D;
         
-        /// <summary>The Extender module using socket 9 of the mainboard.</summary>
+        /// <summary>The Extender module using socket 8 of the mainboard.</summary>
         private Gadgeteer.Modules.GHIElectronics.Extender extender;
+        
+        /// <summary>The Joystick module using socket 9 of the mainboard.</summary>
+        private Gadgeteer.Modules.GHIElectronics.Joystick joystick;
         
         /// <summary>This property provides access to the Mainboard API. This is normally not necessary for an end user program.</summary>
         protected new static GHIElectronics.Gadgeteer.FEZSpider Mainboard {
@@ -64,7 +67,8 @@ namespace Client {
             this.displayT35 = new GTM.GHIElectronics.DisplayT35(14, 13, 12, 10);
             this.multicolorLED = new GTM.GHIElectronics.MulticolorLED(11);
             this.ethernetJ11D = new GTM.GHIElectronics.EthernetJ11D(7);
-            this.extender = new GTM.GHIElectronics.Extender(9);
+            this.extender = new GTM.GHIElectronics.Extender(8);
+            this.joystick = new GTM.GHIElectronics.Joystick(9);
         }
     }
 }
