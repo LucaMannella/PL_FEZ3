@@ -29,7 +29,7 @@ namespace Server
         private const string UNKNOW_COMMND = "400BAD_REQUEST-";
         private const string ALARM = "yes-";
         private const string NOALARM = "no-";
-        private long lasttime = 0;
+        private long lastTime = 0;
         private Database mDatabase;
 
         public ClientManager(String mac, int porta)
@@ -38,9 +38,7 @@ namespace Server
             this.porta = porta;
             this.motionDetector = new MotionDetector3Optimized();
             this.mDatabase = Database.getInstance();
-
         }
-
 
         public void start()
         {
@@ -59,7 +57,6 @@ namespace Server
 
             try
             {
-
                 Thread keepalive = new Thread(() => checkKeepAlive());
                 keepalive.Start();
 
@@ -75,66 +72,62 @@ namespace Server
                 Console.WriteLine("Message : " + e.Message);
                 return;
             }
-                while (true)
-                {
-                    try
+            while (true)
+            {
+                try {
+                    Console.WriteLine("Waiting for a connection..." + "from client: " + this.myMac + "on port:" + porta);
+                    Console.WriteLine("");
+                    // Program is suspended while waiting for an incoming connection.
+                    handlerClient = listener.Accept();
+
+                    MySocket clientsock = new MySocket(handlerClient);
+
+                    String cmd = receiveString(clientsock.s);
+                    switch (cmd)
                     {
-                        Console.WriteLine("Waiting for a connection..." + "from client: " + this.myMac + "on port:" + porta);
-                        Console.WriteLine("");
-                        // Program is suspended while waiting for an incoming connection.
-                        handlerClient = listener.Accept();
-
-                        MySocket clientsock = new MySocket(handlerClient);
-
-                        String cmd = receiveString(clientsock.s);
-                        switch (cmd)
-                        {
-                            case "keep\0":
-                                Console.WriteLine(cmd);
-                                String macaddr2 = clientsock.receiveString();
-                                String time = clientsock.receiveString();
-                                if (macaddr2.Equals(this.myMac))
-                                {
-                                    Console.WriteLine("Received keepalive from: " + macaddr2 + "at: " + time);
-                                    lasttime = Int64.Parse(time);
-                                }
+                        case "keep\0":
+                            Console.WriteLine(cmd);
+                            String macaddr2 = clientsock.receiveString();
+                            String time = clientsock.receiveString();
+                            if (macaddr2.Equals(this.myMac))
+                            {
+                                Console.WriteLine("Received keepalive from: " + macaddr2 + "at: " + time);
+                                lastTime = Int64.Parse(time);
+                            }
                                 
-                                byte[] toSend = System.Text.Encoding.UTF8.GetBytes(OK);
-                                clientsock.Send(toSend, toSend.Length, SocketFlags.None);
-                                clientsock.Close();
-                                break;
+                            byte[] toSend = System.Text.Encoding.UTF8.GetBytes(OK);
+                            clientsock.Send(toSend, toSend.Length, SocketFlags.None);
+                            clientsock.Close();
+                            break;
 
-                            case "firstImage\0":
-                                Console.WriteLine("Received first image from: " + myMac);
-                                System.Drawing.Bitmap current1 = receiveFile(lungImage, clientsock.s);
-                                Thread thread = new Thread(() => elaborazione(current1, clientsock));
-                                thread.Start();
-                                break;
+                        case "firstImage\0":
+                            Console.WriteLine("Received first image from: " + myMac);
+                            System.Drawing.Bitmap current1 = receiveFile(lungImage, clientsock.s);
+                            Thread thread = new Thread(() => elaborazione(current1, clientsock));
+                            thread.Start();
+                            break;
 
+                        case "manageImage\0":
+                            Console.WriteLine("Received image from: " + myMac);
+                            System.Drawing.Bitmap current = receiveFile(lungImage, clientsock.s);
+                            Thread thread2 = new Thread(() => elaborazione(current, clientsock));
+                            thread2.Start();
+                            break;
 
-                            case "manageImage\0":
-                                Console.WriteLine("Received image from: " + myMac);
-                                System.Drawing.Bitmap current = receiveFile(lungImage, clientsock.s);
-                                Thread thread2 = new Thread(() => elaborazione(current, clientsock));
-                                thread2.Start();
-                                break;
-
-                            default:
-                                Console.WriteLine("Error : Unknokwn command");
-                                 byte[] toSend2 = System.Text.Encoding.UTF8.GetBytes(UNKNOW_COMMND);
-                                clientsock.Send(toSend2, toSend2.Length, SocketFlags.None);
-                                clientsock.Close();
-                                break;
-                        }
-
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine("Unexpected Error");
-                        Console.WriteLine("Source : " + e.Source);
-                        Console.WriteLine("Message : " + e.Message);
+                        default:
+                            Console.WriteLine("Error : Unknokwn command");
+                                byte[] toSend2 = System.Text.Encoding.UTF8.GetBytes(UNKNOW_COMMND);
+                            clientsock.Send(toSend2, toSend2.Length, SocketFlags.None);
+                            clientsock.Close();
+                            break;
                     }
                 }
+                catch (Exception e) {
+                    Console.WriteLine("Unexpected Error");
+                    Console.WriteLine("Source : " + e.Source);
+                    Console.WriteLine("Message : " + e.Message);
+                }
+            }
         }
 
 
@@ -146,12 +139,12 @@ namespace Server
 
         private void checkKeepAlive()
         {
-            Boolean check= true;
+            Boolean check = true;
 
             while (check)
             {
-                if(lasttime != 0){
-                    if (CurrentTimeMillis() - lasttime > 20000)
+                if(lastTime != 0) {
+                    if (CurrentTimeMillis() - lastTime > 20000)
                     {
                         String subject = "Warning client disconnected";
                         String message = "The client: " + myMac.Remove(myMac.Length - 1) + " is shut down at: " + DateTime.Now.ToLongTimeString() +" of: " + DateTime.Now.ToLongDateString();
@@ -159,7 +152,6 @@ namespace Server
                         break;
                     }
                 }
-                
             }
 
         }
@@ -170,7 +162,6 @@ namespace Server
             //abilito il calcolo
             motionDetector.MotionLevelCalculation = true;
             processImage(current, socket);
-
         }
 
         private void processImage(System.Drawing.Bitmap current, MySocket socket)
@@ -211,10 +202,10 @@ namespace Server
         {
             byte[] buffer = new byte[lung];
 
-
             long totRicevuti = 0;
             int ricevuti = -1;
             long mancanti = lung - totRicevuti;
+
             while ((mancanti = lung - totRicevuti) > 0)
             {
                 if (mancanti >= lung)
@@ -223,7 +214,6 @@ namespace Server
                     ricevuti = s.Receive(buffer, (int)totRicevuti, (int)mancanti, SocketFlags.None);
                 totRicevuti += ricevuti;
             }
-
 
             var imageConverter = new ImageConverter();
             var image = (Image)imageConverter.ConvertFrom(buffer);
@@ -231,17 +221,16 @@ namespace Server
             a.Save(@"C:\Users\Alfonso-LAPTOP\Desktop\image" + cont + ".jpg");
             cont++;        
             return a;
-
         }
 
         public byte[] receiveFileAsByteArray(long lung, Socket s)
         {
             byte[] buffer = new byte[lung];
 
-
             long totRicevuti = 0;
             int ricevuti = -1;
             long mancanti = lung - totRicevuti;
+
             while ((mancanti = lung - totRicevuti) > 0)
             {
                 if (mancanti >= lung)
@@ -251,9 +240,7 @@ namespace Server
                 totRicevuti += ricevuti;
             }
 
-
             return buffer;
-
         }
 
         private void sendMail(String subject, String message, String attachmentFilename)
@@ -271,7 +258,6 @@ namespace Server
             smtpclient.UseDefaultCredentials = false;
             smtpclient.Credentials = new NetworkCredential(fromAddress.Address, fromPassword);
 
-
             MailMessage mymailmex = new MailMessage(fromAddress, toAddress);
             mymailmex.Subject = subject;
             mymailmex.Body = message;
@@ -287,22 +273,19 @@ namespace Server
             {
                 Console.WriteLine(e.Message);
             }
-           
-            
         }
 
 
         public string receiveString(Socket socket)
         {
-
             byte[] buffer = new byte[1000];
             int ricevuti = 0;
             char vOut = 'a';
+
             while (vOut != '-')
             {
                 ricevuti += socket.Receive(buffer, ricevuti, 1, SocketFlags.None);
                 vOut = Convert.ToChar(buffer[ricevuti - 1]);
-
             }
 
             byte[] buf = new byte[ricevuti];
@@ -322,10 +305,6 @@ namespace Server
             return (long)(DateTime.UtcNow - Jan1st1970).TotalMilliseconds;
         }
 
-
     }
-
-    
-
 
 }
