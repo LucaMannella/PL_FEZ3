@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Service;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -14,13 +15,13 @@ namespace FinalService
     [ServiceBehavior(AddressFilterMode = AddressFilterMode.Any)]
     public class Service1 : IService1
     {
-        private const string IPADDR = "192.168.1.54";
+        private const string IPADDR = "192.168.137.1";
         private const int PORT = 1500;
         private const string GETPORT = "getPort\0";
-        private const string KEEPALIVE = "keepAlive\0";
+        private const string KEEPALIVE = "keep-";
         private const string OK = "200OK";
 
-        public string[] getServerAddressWithPort(string myMacAddress)
+        public AddressResponse getServerAddressWithPort(string myMacAddress)
         {
             string[] bRet = new string[3];
 
@@ -47,10 +48,12 @@ namespace FinalService
 
             clientSocket.Close();
 
+            AddressResponse response = new AddressResponse(IPADDR, port.Remove(port.Length - 1), CurrentTimeMillis());
+            /*
             bRet[0] = IPADDR;
             bRet[1] = port.Remove(port.Length - 1);
             bRet[2] = CurrentTimeMillis().ToString();
-            
+            */
             /*
             byte[] buf = new byte[byterecived];
 
@@ -60,7 +63,7 @@ namespace FinalService
 
           */
 
-            return bRet;
+            return response;
         }
 
         private static readonly DateTime Jan1st1970 = new DateTime (1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
@@ -71,7 +74,7 @@ namespace FinalService
         }
 
 
-        public Boolean keepAlive(string myMacAddress, string mycurrentTime, int port)
+        public Boolean keepAlive(string myMacAddress, long mycurrentTime, int port)
         {
 
             Socket clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -80,11 +83,10 @@ namespace FinalService
             IPAddress ipAddress = IPAddress.Parse(IPADDR);
             IPEndPoint serverEndPoint = new IPEndPoint(ipAddress, port);
 
-
             byte[] bufferReceive = new byte[1000];
-            byte[] toSend = System.Text.Encoding.UTF8.GetBytes(KEEPALIVE);
+            byte[] toSend = System.Text.Encoding.ASCII.GetBytes(KEEPALIVE);
             byte[] toSend2 = System.Text.Encoding.UTF8.GetBytes((myMacAddress + '\0'));
-            byte[] toSend3 = System.Text.Encoding.UTF8.GetBytes((mycurrentTime + '\0'));
+            byte[] toSend3 = System.Text.Encoding.UTF8.GetBytes(mycurrentTime.ToString() + '\0');
 
             clientSocket.Connect(serverEndPoint);
 

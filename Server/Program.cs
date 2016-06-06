@@ -13,7 +13,7 @@ namespace Server
     {
         MySocket s;
 
-        private static string IPADDR = "192.168.1.54";
+        private static string IPADDR = "192.168.137.1";
         private int startingport = 1501;
         private int progressiveport = 0;
         private const string OK = "200OK\0";
