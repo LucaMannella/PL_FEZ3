@@ -48,21 +48,20 @@ namespace Server
 
         public void start()
         {
+            bool result;
             Socket handlerClient;
             IPAddress ip = IPAddress.Parse(Constants.SERVER_IP_ADDR);
             IPEndPoint localEndPoint = new IPEndPoint(ip, porta);
             Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             
-            mDatabase.OpenConnect();
-            bool result = mDatabase.insertClient(this.myMac, this.porta);
-            mDatabase.CloseConnect();
+            result = mDatabase.insertClient(this.myMac, this.porta);
 
             if(!result){
                 Console.WriteLine("Error: Impossible to save new client in db");
+                return;
             }
 
-            try
-            {
+            try {
                 Thread keepalive = new Thread(() => checkKeepAlive());
                 keepalive.Start();
 
@@ -78,9 +77,10 @@ namespace Server
                 Console.WriteLine("Message : " + e.Message);
                 return;
             }
+
             while (true)
             {
-                try {
+                try { 
                     Console.WriteLine("Waiting for a connection..." + "from client: " + this.myMac + "on port:" + porta);
                     Console.WriteLine("");
                     // Program is suspended while waiting for an incoming connection.
@@ -134,6 +134,7 @@ namespace Server
                     Console.WriteLine("Message : " + e.Message);
                 }
             }
+            return;
         }
 
 
@@ -201,6 +202,8 @@ namespace Server
                     socket.Close();
                 }
             }
+
+            return;
         }
 
 
