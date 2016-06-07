@@ -12,6 +12,7 @@ namespace Server
     class Program
     {
         MySocket s;
+        private static Database db;
 
         private int startingport = Constants.PORT + 1;
         private int progressiveport = 0;
@@ -22,7 +23,9 @@ namespace Server
          */ 
         static void Main(string[] args)
         {
-            Database db = Database.getInstance();
+            db = Database.getInstance();
+            db.OpenConnect();
+
             if (db.removeAllClient())
                 Console.WriteLine("The database was succesfully initialized!");
             else
@@ -54,19 +57,20 @@ namespace Server
                 {
                     Console.WriteLine("Waiting for a connection...");
                     // Program is suspended while waiting for an incoming connection.
-                    handler = listener.Accept();                    
+                    handler = listener.Accept();
                    
                     s = new MySocket(handler);
-                    ThreadStart threadDelegate = new ThreadStart(manageCommand);
-                    Thread newThread = new Thread(threadDelegate);
-                    newThread.Start();
+                    
+                    new Thread(manageCommand).Start();
                 }
             }
             catch (Exception e) {
                 Console.WriteLine("Unexpected Error");
                 Console.WriteLine("Source : " + e.Source);
                 Console.WriteLine("Message : " + e.Message);
-                return;
+            }
+            finally {
+                db.CloseConnect();
             }
         }
 
@@ -82,30 +86,35 @@ namespace Server
                     String macaddr = s.receiveString();
                     Console.WriteLine(macaddr);
 
-                    int port = startingport + progressiveport;
-                    progressiveport++;
+                    String macToCheck = macaddr.Substring(0, macaddr.Length-1);
 
-                    Thread thread = new Thread(() => manageNewClient(macaddr, port));
-                    thread.Start();
-                                        
-                    sendPort(port);
+                    if (!db.existClient(macToCheck))
+                    {
+                        int port = startingport + progressiveport;
+                        progressiveport++;
+
+                        sendPort(port);     //ToDo: problema! Se il mac è invalido come lo segnaliamo prima di
+                                            // rispondere al client?!?!
+
+                        // This method manage the comunication between this client and the server.
+                        ClientManager client = new ClientManager(macaddr, port);
+                        client.start();
+
+                        Console.WriteLine("Client: " + macaddr + " on port: " + port + " has ended!\n");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Error: Device: " + macaddr + " it is already present in the database!\n");
+                        sendPort(-1);
+                    }
+
                     break;
                     
                 default:
                     break;
             }
         }
-
-        /**
-         * This method manage the comunication between a client and the server.
-         * It should be instatiated as a thread.
-         */ 
-        private void manageNewClient(string macaddr, int port)
-        {
-            ClientManager client = new ClientManager(macaddr, port);
-            client.start();
-        }
-
+ 
         /**
          * This method sends to the client the port that must be used
          * to contact the server.
