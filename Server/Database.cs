@@ -15,10 +15,7 @@ namespace Server
         bool connection_Opened = false;
         private static Database myInstance = null;
 
-        private Database()
-        {
-
-        }
+        private Database() {    /* empty default private constructor */    }
 
         public static Database getInstance()
         {
@@ -96,12 +93,12 @@ namespace Server
          */
         public bool insertClient(String MACAddress, int port)
         {
+            int res = -1;
+
             if (!connection_Opened) {
                 if (OpenConnect() == false)
                     return false;
             }
-
-            int res = -1;
 
             String query = "SELECT * FROM clients WHERE MAC = '"+MACAddress+"';";
             DataRowCollection records = GetRowsWhithQuery(query, "clients");
@@ -117,6 +114,28 @@ namespace Server
             }
 
             if (res <= 0)
+                return false;
+            else
+                return true;
+        }
+
+        /**
+         * This checks if exists a client inside the "clients" table
+         * of the PL_FEZ03 database with the specified MACAddress.
+         * 
+         * @param MACAddress - The MAC address of the client.
+         * @returns True if the client exists, false otherwise.
+         */
+        public bool existClient(String MACAddress) 
+        {
+            if (!connection_Opened) {
+                if (OpenConnect() == false)
+                    return false;
+            }
+
+            String query = "SELECT * FROM clients WHERE MAC = '"+MACAddress+"';";
+            DataRowCollection records = GetRowsWhithQuery(query, "clients");
+            if (records.Count <= 0)
                 return false;
             else
                 return true;
@@ -217,6 +236,8 @@ namespace Server
             }
         }
 
+
+// from here methods actually not used
         /**
          * This method prevent some SQL injections
          */
@@ -225,6 +246,9 @@ namespace Server
             return MySqlHelper.EscapeString(s);
         }
 
+        /**
+         * This method should be used to manage a transaction.
+         */ 
         public MySqlTransaction getTransaction()
         {
             MySqlTransaction t;
@@ -232,8 +256,6 @@ namespace Server
             return t;
         }
 
-
-// actually not used methods
         public int ExecuteNonQuery(string query, byte[] bytes)
         {
             //query = query.Replace("\\", "\\\\");
