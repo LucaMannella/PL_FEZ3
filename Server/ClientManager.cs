@@ -56,7 +56,7 @@ namespace Server
             
             result = mDatabase.insertClient(this.myMac, this.porta);
 
-            if(!result){
+            if(!result) {
                 Console.WriteLine("Error: Impossible to save new client in db");
                 return;
             }
@@ -66,12 +66,9 @@ namespace Server
                 keepalive.Start();
 
                 listener.Bind(localEndPoint);
-                listener.Listen(2);
-
-                // Start listening for connections.
+                listener.Listen(2); // Start listening for connections.
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 Console.WriteLine("Unexpected Error");
                 Console.WriteLine("Source : " + e.Source);
                 Console.WriteLine("Message : " + e.Message);
@@ -80,7 +77,7 @@ namespace Server
 
             while (true)
             {
-                try { 
+                try {
                     Console.WriteLine("Waiting for a connection..." + "from client: " + this.myMac + "on port:" + porta);
                     Console.WriteLine("");
                     // Program is suspended while waiting for an incoming connection.
@@ -134,7 +131,7 @@ namespace Server
                     Console.WriteLine("Message : " + e.Message);
                 }
             }
-            return;
+
         }
 
 
