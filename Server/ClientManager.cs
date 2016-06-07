@@ -13,22 +13,28 @@ namespace Server
 {
     class ClientManager
     {
-        private String myMac;
-        private int porta;
-        int cont = 0;
-        MotionDetector3Optimized motionDetector;
-        byte[] referenceBitmap;
-        //oppure usare:
-        //MotionDetector4 motionDetector = new MotionDetector4();
-        System.Drawing.Bitmap lastFrame = null;
-        //grandezza immagine che mi aspetto di ricevere
-        long lungImage = 230454;
-        //livello che dice quando far scattare allarme ed è compreso tra 0 e 1
-        private double alarmLevel = 0.005;
+        private static readonly DateTime Jan1st1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
         private const string OK = "200OK\0";
         private const string UNKNOW_COMMND = "400BAD_REQUEST-";
         private const string ALARM = "yes-";
         private const string NOALARM = "no-";
+
+         MotionDetector3Optimized motionDetector;
+        //oppure usare:
+        //MotionDetector4 motionDetector = new MotionDetector4();
+
+        byte[] referenceBitmap;
+        System.Drawing.Bitmap lastFrame = null;
+
+        long lungImage = 230454;    //grandezza immagine che mi aspetto di ricevere
+
+        //livello che dice quando far scattare allarme ed è compreso tra 0 e 1
+        private double alarmLevel = 0.005;
+
+        int cont = 0;
+        private String myMac;
+        private int porta;
         private long lastTime = 0;
         private Database mDatabase;
 
@@ -43,7 +49,7 @@ namespace Server
         public void start()
         {
             Socket handlerClient;
-            IPAddress ip = IPAddress.Parse("192.168.137.1");
+            IPAddress ip = IPAddress.Parse(Constants.SERVER_IP_ADDR);
             IPEndPoint localEndPoint = new IPEndPoint(ip, porta);
             Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             
@@ -218,7 +224,7 @@ namespace Server
             var imageConverter = new ImageConverter();
             var image = (Image)imageConverter.ConvertFrom(buffer);
             Bitmap a = new Bitmap(image);
-            a.Save(@"C:\Users\Alfonso-LAPTOP\Desktop\image" + cont + ".jpg");
+            a.Save(Constants.IMAGE_DIRECTORY + cont + ".jpg");
             cont++;        
             return a;
         }
@@ -245,9 +251,9 @@ namespace Server
 
         private void sendMail(String subject, String message, String attachmentFilename)
         {
-            var fromAddress = new MailAddress("fez03noreply@gmail.com", "From Name");
-            var toAddress = new MailAddress("valenzise@tiscali.it", "To Name");
-            String fromPassword = "fez03password";
+            var fromAddress = new MailAddress(Constants.MAIL_SENDER, "From Name");
+            var toAddress = new MailAddress(Constants.MAIL_RECEIVER, "To Name");
+            String fromPassword = Constants.MAIL_SENDER_PASSWORD;
 
             SmtpClient smtpclient = new SmtpClient();
 
@@ -297,8 +303,6 @@ namespace Server
 
             return System.Text.Encoding.UTF8.GetString(buf);
         }
-
-        private static readonly DateTime Jan1st1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
         public static long CurrentTimeMillis()
         {
