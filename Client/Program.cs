@@ -19,6 +19,7 @@ using Gadgeteer.Modules.GHIElectronics;
 using Gadgeteer.SocketInterfaces;
 using Ws.Services.Binding;
 using Ws.Services;
+using MainWindowExample;
 
 namespace Client
 {
@@ -61,7 +62,7 @@ namespace Client
             Debug.Print("Program Started");     // to show messages in "Output" window during debugging
             Mainboard.SetDebugLED(true);
 
-            Thread.Sleep(10000);
+            Thread.Sleep(2000);
             InitSensors();
             
             SetupEthernet();
@@ -73,8 +74,9 @@ namespace Client
             camera.BitmapStreamed += camera_BitmapStreamed;
             button.ButtonPressed += button_ButtonPressed;
 
-            camera.StartStreaming();
+           // camera.StartStreaming();
 
+           
             GT.Timer timer_joystick = new GT.Timer(100);
             timer_joystick.Tick += joystick_function;
             timer_joystick.Start();
@@ -82,8 +84,27 @@ namespace Client
 
             GT.Timer timer_pir = new GT.Timer(5000);
             timer_pir.Tick += PirDetection;
+
+            SetupWindow();
             //timer_pir.Start();   
         }
+
+        private void SetupWindow()
+        {
+            Window window = displayT35.WPFWindow;
+            Font baseFont = Resources.GetFont(Resources.FontResources.NinaB);
+
+            MainWindow mainWindow = new MainWindow();
+            mainWindow.AddTitleBar("MainWindow Example (by Marco Minerva)", baseFont,
+                        GT.Color.White, GT.Color.Blue, GT.Color.White);
+
+            Text txtMessage = new Text(baseFont, "Custom StatusBar message");
+          
+            mainWindow.AddStatusBar(txtMessage, GT.Color.LightGray);
+
+            window.Child = mainWindow;
+        }
+
 
 
 // ------------------------- Network & Connections ------------------------- //

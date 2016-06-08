@@ -121,7 +121,7 @@ namespace Server
 
                             default:
                                 Console.WriteLine("Error : Unknokwn command");
-                                 byte[] toSend2 = System.Text.Encoding.UTF8.GetBytes(UNKNOW_COMMND);
+                                byte[] toSend2 = System.Text.Encoding.UTF8.GetBytes(UNKNOW_COMMND);
                                 clientsock.Send(toSend2, toSend2.Length, SocketFlags.None);
                                 clientsock.Close();
                                 break;
