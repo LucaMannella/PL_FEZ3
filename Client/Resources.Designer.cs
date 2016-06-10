@@ -29,22 +29,20 @@ namespace Client
         {
             return ((Microsoft.SPOT.Font)(Microsoft.SPOT.ResourceUtility.GetObject(ResourceManager, id)));
         }
-        internal static byte[] GetBytes(Resources.BinaryResources id)
+        internal static string GetString(Resources.StringResources id)
         {
-            return ((byte[])(Microsoft.SPOT.ResourceUtility.GetObject(ResourceManager, id)));
-        }
-        [System.SerializableAttribute()]
-        internal enum BinaryResources : short
-        {
-            NormalButton = -22972,
-            PressedButton = -11274,
-            Image1 = 21113,
+            return ((string)(Microsoft.SPOT.ResourceUtility.GetObject(ResourceManager, id)));
         }
         [System.SerializableAttribute()]
         internal enum FontResources : short
         {
             small = 13070,
             NinaB = 18060,
+        }
+        [System.SerializableAttribute()]
+        internal enum StringResources : short
+        {
+            window = 27311,
         }
     }
 }

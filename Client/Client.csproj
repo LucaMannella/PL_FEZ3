@@ -41,7 +41,6 @@
   <ItemGroup>
     <Compile Include="ByteExtensions.cs" />
     <Compile Include="BaseWindow.cs" />
-    <Compile Include="MainWindow.cs" />
     <Compile Include="PinWindow.cs" />
     <Compile Include="Program.generated.cs">
       <AutoGen>True</AutoGen>
@@ -58,6 +57,7 @@
     <Compile Include="Service.cs" />
     <Compile Include="ServiceClientProxy.cs" />
     <Compile Include="ServiceHostedService.cs" />
+    <Compile Include="WindowsManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Gadgeteer" />
@@ -73,6 +73,7 @@
     <Reference Include="Gadgeteer.WebServer, Version=2.43.1.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
+    <Reference Include="GHI.Glide, Version=4.3.7.10, Culture=neutral, processorArchitecture=MSIL" />
     <Reference Include="GHI.Hardware, Version=4.3.7.10, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
@@ -150,5 +151,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\NormalButton.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\number0.png" />
   </ItemGroup>
 </Project>

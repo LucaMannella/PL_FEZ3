@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Threading;
 using Microsoft.SPOT;
-using Microsoft.SPOT.Presentation;
 using Microsoft.SPOT.Presentation.Controls;
 using Microsoft.SPOT.Presentation.Media;
 using Microsoft.SPOT.Presentation.Shapes;
@@ -20,6 +19,9 @@ using Gadgeteer.SocketInterfaces;
 using Ws.Services.Binding;
 using Ws.Services;
 using MainWindowExample;
+using GHI.Glide;
+using GHI.Glide.Display;
+using GHI.Glide.UI;
 
 namespace Client
 {
@@ -83,26 +85,43 @@ namespace Client
             GT.Timer timer_pir = new GT.Timer(5000);
             timer_pir.Tick += PirDetection;
 
-            SetupWindow();
+            WindowsManager.setupWindowInsertPin();
             //timer_pir.Start();   
         }
 
         private void SetupWindow()
         {
+            /*
             Window window = displayT35.WPFWindow;
             Font baseFont = Resources.GetFont(Resources.FontResources.NinaB);
 
             MainWindow mainWindow = new MainWindow();
-            mainWindow.AddTitleBar("MainWindow Example (by Marco Minerva)", baseFont,
+            mainWindow.AddTitleBar("MainWindow ", baseFont,
                         GT.Color.White, GT.Color.Blue, GT.Color.White);
 
-            Text txtMessage = new Text(baseFont, "Custom StatusBar message");
+            Image number0 = Resources.g
+
+            Text txtMessage = new Text(baseFont, "Insert Pin");
           
             mainWindow.AddStatusBar(txtMessage, GT.Color.LightGray);
 
             window.Child = mainWindow;
+            */
+
+            Window window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.window));
+
+            GlideTouch.Initialize();
+            /*
+            GHI.Glide.UI.Button btn = (GHI.Glide.UI.Button)window.GetChildByName("btn");
+            btn.TapEvent += OnTap;
+            */
+            Glide.MainWindow = window;
         }
 
+        private static void OnTap(object sender)
+        {
+            Debug.Print("Button tapped.");
+        }
 
 
 // ------------------------- Network & Connections ------------------------- //

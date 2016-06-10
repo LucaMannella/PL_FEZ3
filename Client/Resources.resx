@@ -118,19 +118,30 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="Image1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Image1.jpg;System.Byte[], mscorlib, Version=4.3.1.0, Culture=neutral, PublicKeyToken=null</value>
-  </data>
   <data name="NinaB" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\NinaB.tinyfnt;System.Byte[], mscorlib, Culture=neutral, PublicKeyToken=null</value>
   </data>
-  <data name="NormalButton" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\NormalButton.jpg;System.Byte[], mscorlib, Version=4.3.1.0, Culture=neutral, PublicKeyToken=null</value>
-  </data>
-  <data name="PressedButton" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\PressedButton.jpg;System.Byte[], mscorlib, Version=4.3.1.0, Culture=neutral, PublicKeyToken=null</value>
-  </data>
   <data name="small" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\small.tinyfnt;System.Byte[], mscorlib, Culture=neutral, PublicKeyToken=null</value>
+  </data>
+  <data name="window" xml:space="preserve">
+    <value>&lt;Glide Version="1.0.7"&gt;
+  &lt;Window Name="root_windows" Width="320" Height="240" BackColor="00000"&gt;
+    &lt;Button Name="button1" X="37" Y="40" Width="80" Height="32" Alpha="255" Text="1" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;Button Name="button2" X="126" Y="40" Width="80" Height="32" Alpha="255" Text="2" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;Button Name="button3" X="213" Y="40" Width="80" Height="32" Alpha="255" Text="3" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;Button Name="button5" X="126" Y="81" Width="80" Height="32" Alpha="255" Text="5" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;Button Name="button4" X="37" Y="81" Width="80" Height="32" Alpha="255" Text="4" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;Button Name="button7" X="37" Y="124" Width="80" Height="32" Alpha="255" Text="7" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;Button Name="button6" X="213" Y="81" Width="80" Height="32" Alpha="255" Text="6" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;Button Name="button8" X="126" Y="124" Width="80" Height="32" Alpha="255" Text="8" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;Button Name="button9" X="213" Y="124" Width="80" Height="32" Alpha="255" Text="9" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;PasswordBox Name="password_text" X="105" Y="206" Width="120" Height="32" Alpha="255" Text="" TextAlign="Left" Font="4" FontColor="000000"/&gt;
+    &lt;Button Name="button0" X="126" Y="167" Width="80" Height="32" Alpha="255" Text="0" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;Button Name="button_confirm" X="213" Y="167" Width="80" Height="32" Alpha="255" Text="OK" Font="4" FontColor="00FF30" DisabledFontColor="111111" TintColor="111111" TintAmount="0"/&gt;
+    &lt;Button Name="button_del" X="37" Y="167" Width="80" Height="32" Alpha="255" Text="DEL" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;TextBlock Name="instance34080" X="0" Y="0" Width="320" Height="32" Alpha="255" Text="INSERT YOUR PIN" TextAlign="center" TextVerticalAlign="center" Font="6" FontColor="2000B0" BackColor="000000" ShowBackColor="false"/&gt;
+  &lt;/Window&gt;
+&lt;/Glide&gt;</value>
   </data>
 </root>
