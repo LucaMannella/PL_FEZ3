@@ -49,7 +49,11 @@ namespace Client
         Int32 PreviousAverage;
         long servertime = 0;
 
+        private GT.Timer timer_joystick;
+
         private Boolean StopMe = false;
+        private Boolean setupComplete = false;
+        private Boolean NetworkUp = false;
 
         IService1ClientProxy proxy;
         IPEndPoint serverEndPoint = null;  // represent the connection with the server
@@ -62,7 +66,7 @@ namespace Client
             Debug.Print("Program Started");     // to show messages in "Output" window during debugging
             Mainboard.SetDebugLED(true);
 
-            Thread.Sleep(2000);
+            Thread.Sleep(500);
             InitSensors();
             
             SetupEthernet();
@@ -72,55 +76,83 @@ namespace Client
 
             camera.PictureCaptured += camera_PictureCaptured;
             camera.BitmapStreamed += camera_BitmapStreamed;
-            button.ButtonPressed += button_ButtonPressed;
+            
 
            // camera.StartStreaming();
 
-            joystick.Calibrate();
-            GT.Timer timer_joystick = new GT.Timer(100);
-            timer_joystick.Tick += joystick_function;
-            timer_joystick.Start();
+           
 
-            GT.Timer timer_pir = new GT.Timer(5000);
-            timer_pir.Tick += PirDetection;
-
-            WindowsManager.setupWindowInsertPin();
+            WindowsManager.setupWindowSetupCamera();
             //timer_pir.Start();   
         }
 
-        private void SetupWindow()
+        private GHI.Glide.UI.ProgressBar progress;
+        private GT.Timer timer_progress;
+        public void setupCamera()
         {
-            /*
-            Window window = displayT35.WPFWindow;
-            Font baseFont = Resources.GetFont(Resources.FontResources.NinaB);
-
-            MainWindow mainWindow = new MainWindow();
-            mainWindow.AddTitleBar("MainWindow ", baseFont,
-                        GT.Color.White, GT.Color.Blue, GT.Color.White);
-
-            Image number0 = Resources.g
-
-            Text txtMessage = new Text(baseFont, "Insert Pin");
-          
-            mainWindow.AddStatusBar(txtMessage, GT.Color.LightGray);
-
-            window.Child = mainWindow;
-            */
-
-            Window window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.window));
-
-            GlideTouch.Initialize();
-            /*
-            GHI.Glide.UI.Button btn = (GHI.Glide.UI.Button)window.GetChildByName("btn");
-            btn.TapEvent += OnTap;
-            */
-            Glide.MainWindow = window;
+            
+            if (camera.CameraReady)
+            {
+                camera.StartStreaming();
+                progress = WindowsManager.setupWindowProgress();
+                timer_progress = new GT.Timer(350);
+                timer_progress.Tick += progressIncrement;
+                timer_progress.Start();
+            }
+            button.ButtonPressed += button_ButtonPressed;
+            
         }
 
-        private static void OnTap(object sender)
+        private void progressIncrement(GT.Timer timer)
         {
-            Debug.Print("Button tapped.");
+            if (progress != null)
+            {
+                progress.Value += 10;
+                progress.Invalidate();
+            }
+            
+            
         }
+
+
+        private void setupJoystick()
+        {
+            joystick.Calibrate();
+            timer_joystick = new GT.Timer(100);
+            timer_joystick.Tick += joystick_function;
+            timer_joystick.Start();
+
+        }
+
+        private void setupPir()
+        {
+            GT.Timer timer_pir = new GT.Timer(5000);
+            timer_pir.Tick += PirDetection;
+        }
+
+        private void initServer()
+        {
+            bindProxyService();
+            getAddressAndPort();
+
+            // Addressing
+            IPAddress ipAddress = IPAddress.Parse(connectionInfo[0]);
+            int port = int.Parse(connectionInfo[1]);
+            if (port == -1)
+            {
+                Debug.Print("Error: Invalid Port, impossible to establish a connection!\n");
+
+                //terminare applicazione
+                return;
+            }
+            serverEndPoint = new IPEndPoint(ipAddress, port);
+
+            GT.Timer timer_keepAlive = new GT.Timer(10000);
+            timer_keepAlive.Tick += keepAlive;
+            //timer_keepAlive.Start();
+        }
+
+      
 
 
 // ------------------------- Network & Connections ------------------------- //
@@ -136,27 +168,20 @@ namespace Client
         private void OnNetworkUp(GTM.Module.NetworkModule sender, GTM.Module.NetworkModule.NetworkState state)
         {
             Debug.Print("Network up!");
+            NetworkUp = true;
             multicolorLED.TurnGreen();
             ListNetworkInterfaces();
 
-            bindProxyService();
-            getAddressAndPort();
+           
+        }
 
-            // Addressing
-            IPAddress ipAddress = IPAddress.Parse(connectionInfo[0]);
-            int port = int.Parse( connectionInfo[1] );
-            if (port == -1)
-            {
-                Debug.Print("Error: Invalid Port, impossible to establish a connection!\n");
-
-                //terminare applicazione
-                return;
-            }
-            serverEndPoint = new IPEndPoint(ipAddress, port);
-
-            GT.Timer timer_keepAlive = new GT.Timer(10000);
-            timer_keepAlive.Tick += keepAlive;
-            //timer_keepAlive.Start();
+        private void setupCameraTakePicture()
+        {
+            
+           GT.Timer timer_getimage = new GT.Timer(2000);
+           timer_getimage.Tick += takePicture;
+           timer_getimage.Start();  
+         
         }
 
 
@@ -211,9 +236,15 @@ namespace Client
         private void OnNetworkDown(GTM.Module.NetworkModule sender, GTM.Module.NetworkModule.NetworkState state)
         {
             Debug.Print("Network down!");
+            NetworkUp = false;
             multicolorLED.TurnRed();
-            StopMe = true;      //stopping keep alive thread
-           // ScattaAllarme();
+          
+            if (setupComplete)
+            {
+                StopMe = true;  
+                ScattaAllarme();
+            }
+                
         }
 
 // ----------------------- End Network & Connections ----------------------- //
@@ -315,17 +346,44 @@ namespace Client
         {
             Debug.Print("Button pressed!");
             camera.StopStreaming();
-            camera.TakePicture();
-            /*
-            GT.Timer timer_getimage = new GT.Timer(5000);
-            timer_getimage.Tick += takePicture;
-            timer_getimage.Start();  
-            */
-            // invio della prima immagine
+            timer_joystick.Stop();
+
+            if (NetworkUp)
+            {
+                /*
+                setupComplete = true;
+                Thread.Sleep(500);
+                camera.TakePicture();
+                 */
+                WindowsManager.setupWindowInsertPin();
+            }
+            else
+            {
+                Debug.Print("Network_Down!!!");
+                WindowsManager.setupWindowNetworkDown();
+            }
+           
+           
         }
 
+        public void startCapture()
+        {
+            
+           
+        }
+
+        private Boolean invalidate = true;
         private void camera_BitmapStreamed(GTM.GHIElectronics.Camera sender, Bitmap e)
-        {            
+        {
+            if (invalidate)
+            {
+                timer_progress.Stop();
+                progress.Value = 100;
+                progress.Invalidate();
+                invalidate = false;
+            }
+           
+            setupJoystick();
             displayT35.SimpleGraphics.DisplayImage(e, 0, 0);    
         }
 
@@ -346,6 +404,7 @@ namespace Client
                 RGlobal = heuristicSum(bitmapA);
                 PreviousAverage = RGlobal / 9;
                 sendPicture(picture.PictureData, true);
+                setupCameraTakePicture();
                 return;
             }
 
