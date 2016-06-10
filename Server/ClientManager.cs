@@ -38,6 +38,7 @@ namespace Server
         private long lastTime = 0;
         private Database mDatabase;
 
+
         public ClientManager(String mac, int porta)
         {
             this.myMac = mac;
@@ -45,6 +46,7 @@ namespace Server
             this.motionDetector = new MotionDetector3Optimized();
             this.mDatabase = Database.getInstance();
         }
+
 
         public void start()
         {
@@ -57,7 +59,7 @@ namespace Server
             result = mDatabase.insertClient(this.myMac, this.porta);
 
             if(!result) {
-                Console.WriteLine("Error: Impossible to save new client in db");
+                Console.WriteLine("Error: Impossible to save new client in db!");
                 return;
             }
 
@@ -75,62 +77,63 @@ namespace Server
                 return;
             }
 
-                while (true)
+            while (true)
+            {
+                try
                 {
-                try {
-                        Console.WriteLine("Waiting for a connection..." + "from client: " + this.myMac + "on port:" + porta);
-                        Console.WriteLine("");
-                        // Program is suspended while waiting for an incoming connection.
-                        handlerClient = listener.Accept();
+                    Console.WriteLine("Waiting for a connection..." + "from client: " + this.myMac + "on port:" + porta);
+                    Console.WriteLine("");
+                    // Program is suspended while waiting for an incoming connection.
+                    handlerClient = listener.Accept();
 
-                        MySocket clientsock = new MySocket(handlerClient);
+                    MySocket clientsock = new MySocket(handlerClient);
 
-                        String cmd = receiveString(clientsock.s);
-                        switch (cmd)
-                        {
-                            case "keep\0":
-                                Console.WriteLine(cmd);
-                                String macaddr2 = clientsock.receiveString();
-                                String time = clientsock.receiveString();
-                                if (macaddr2.Equals(this.myMac))
-                                {
-                                    Console.WriteLine("Received keepalive from: " + macaddr2 + "at: " + time);
+                    String cmd = receiveString(clientsock.s);
+                    switch (cmd)
+                    {
+                        case "keep\0":
+                            Console.WriteLine(cmd);
+                            String macaddr2 = clientsock.receiveString();
+                            String time = clientsock.receiveString();
+                            if (macaddr2.Equals(this.myMac))
+                            {
+                                Console.WriteLine("Received keepalive from: " + macaddr2 + "at: " + time);
                                 lastTime = Int64.Parse(time);
-                                }
+                            }
                                 
-                                byte[] toSend = System.Text.Encoding.UTF8.GetBytes(OK);
-                                clientsock.Send(toSend, toSend.Length, SocketFlags.None);
-                                clientsock.Close();
-                                break;
+                            byte[] toSend = System.Text.Encoding.UTF8.GetBytes(OK);
+                            clientsock.Send(toSend, toSend.Length, SocketFlags.None);
+                            clientsock.Close();
+                            break;
 
-                            case "firstImage\0":
-                                Console.WriteLine("Received first image from: " + myMac);
-                                System.Drawing.Bitmap current1 = receiveFile(lungImage, clientsock.s);
-                                Thread thread = new Thread(() => elaborazione(current1, clientsock));
-                                thread.Start();
-                                break;
+                        case "firstImage\0":
+                            Console.WriteLine("Received first image from: " + myMac);
+                            System.Drawing.Bitmap current1 = receiveFile(lungImage, clientsock.s);
+                            Thread thread = new Thread(() => processImage(current1, clientsock));
+                            thread.Start();
+                            break;
 
-                            case "manageImage\0":
-                                Console.WriteLine("Received image from: " + myMac);
-                                System.Drawing.Bitmap current = receiveFile(lungImage, clientsock.s);
-                                Thread thread2 = new Thread(() => elaborazione(current, clientsock));
-                                thread2.Start();
-                                break;
+                        case "manageImage\0":
+                            Console.WriteLine("Received image from: " + myMac);
+                            System.Drawing.Bitmap current = receiveFile(lungImage, clientsock.s);
+                            Thread thread2 = new Thread(() => processImage(current, clientsock));
+                            thread2.Start();
+                            break;
 
-                            default:
-                                Console.WriteLine("Error : Unknokwn command");
-                                 byte[] toSend2 = System.Text.Encoding.UTF8.GetBytes(UNKNOW_COMMND);
-                                clientsock.Send(toSend2, toSend2.Length, SocketFlags.None);
-                                clientsock.Close();
-                                break;
-                        }
-                    }
-                catch (Exception e) {
-                        Console.WriteLine("Unexpected Error");
-                        Console.WriteLine("Source : " + e.Source);
-                        Console.WriteLine("Message : " + e.Message);
+                        default:
+                            Console.WriteLine("Error : Unknokwn command");
+                            byte[] toSend2 = System.Text.Encoding.UTF8.GetBytes(UNKNOW_COMMND);
+                            clientsock.Send(toSend2, toSend2.Length, SocketFlags.None);
+                            clientsock.Close();
+                            break;
                     }
                 }
+                catch (Exception e) {
+                    Console.WriteLine("Unexpected Error");
+                    Console.WriteLine("Source : " + e.Source);
+                    Console.WriteLine("Message : " + e.Message);
+                }
+            }
 
         }
 
@@ -141,12 +144,12 @@ namespace Server
             return (byte[])converter.ConvertTo(img, typeof(byte[]));
         }
 
+
         private void checkKeepAlive()
         {
             Boolean check = true;
 
-            while (check)
-            {
+            while (check) {
                 if(lastTime != 0) {
                     if (CurrentTimeMillis() - lastTime > 20000)
                     {
@@ -161,15 +164,11 @@ namespace Server
         }
 
 
-        private void elaborazione(Bitmap current, MySocket socket)
-        {
+        private void processImage(Bitmap current, MySocket socket)
+        {   
             //abilito il calcolo
             motionDetector.MotionLevelCalculation = true;
-            processImage(current, socket);
-        }
 
-        private void processImage(System.Drawing.Bitmap current, MySocket socket)
-        {
             if (lastFrame != null)
             {
                 lastFrame.Dispose();
@@ -189,8 +188,7 @@ namespace Server
                     byte[] toSend = System.Text.Encoding.UTF8.GetBytes(ALARM);
                     socket.Send(toSend, toSend.Length, SocketFlags.None);
                     socket.Close();
-                    Console.WriteLine("Scatta allarme");
-                    Console.WriteLine("");
+                    Console.WriteLine("Allarme Scattato!\n");
                 }
                 else
                 {
@@ -206,6 +204,7 @@ namespace Server
 
         public Bitmap receiveFile(long lung, Socket s)
         {
+            Boolean ok;
             byte[] buffer = new byte[lung];
 
             long totRicevuti = 0;
@@ -223,11 +222,23 @@ namespace Server
 
             var imageConverter = new ImageConverter();
             var image = (Image)imageConverter.ConvertFrom(buffer);
+            String picturePath = Constants.IMAGE_DIRECTORY + cont + ".jpg";
+            cont++;
+
             Bitmap a = new Bitmap(image);
-            a.Save(Constants.IMAGE_DIRECTORY + cont + ".jpg");
-            cont++;        
+            try {
+                a.Save(picturePath);
+                ok = mDatabase.insertSuspiciousPicturePath(myMac, CurrentTimeMillis(), picturePath);
+                if (!ok)
+                    Console.WriteLine("Error: Impossible to store picture: " + picturePath + " on the database!\n");
+            }
+            catch (Exception ex) {
+                Console.WriteLine("Error! Impossible to store the received picture! Exception: "+ex.ToString()+"\n");
+            }
+            
             return a;
         }
+
 
         public byte[] receiveFileAsByteArray(long lung, Socket s)
         {
@@ -248,6 +259,7 @@ namespace Server
 
             return buffer;
         }
+
 
         private void sendMail(String subject, String message, String attachmentFilename)
         {
@@ -303,6 +315,7 @@ namespace Server
 
             return System.Text.Encoding.UTF8.GetString(buf);
         }
+
 
         public static long CurrentTimeMillis()
         {

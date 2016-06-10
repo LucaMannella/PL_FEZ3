@@ -107,10 +107,10 @@ namespace Server
                         Console.WriteLine("Error: Device: " + macaddr + " it is already present in the database!\n");
                         sendPort(-1);
                     }
-
                     break;
                     
                 default:
+                    Console.WriteLine("Error: received unknown request!\nCommand: "+cmd+"\n");
                     break;
             }
         }
