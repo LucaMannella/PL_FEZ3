@@ -40,8 +40,6 @@
   <Import Project="$(NetMfTargetsBaseDir)$(TargetFrameworkVersion)\CSharp.Targets" />
   <ItemGroup>
     <Compile Include="ByteExtensions.cs" />
-    <Compile Include="BaseWindow.cs" />
-    <Compile Include="PinWindow.cs" />
     <Compile Include="Program.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

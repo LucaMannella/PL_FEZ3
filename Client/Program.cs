@@ -18,7 +18,6 @@ using Gadgeteer.Modules.GHIElectronics;
 using Gadgeteer.SocketInterfaces;
 using Ws.Services.Binding;
 using Ws.Services;
-using MainWindowExample;
 using GHI.Glide;
 using GHI.Glide.Display;
 using GHI.Glide.UI;

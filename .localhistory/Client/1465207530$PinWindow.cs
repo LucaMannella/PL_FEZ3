@@ -15,7 +15,6 @@ namespace Client
         public PinWindow()
         {
             AddTitleBar("Inserire PIN", Resources.GetFont(Resources.FontResources.NinaB), GT.Color.Red, GT.Color.Blue, GT.Color.Blue);
-            
 
         }
     }
