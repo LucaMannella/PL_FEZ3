@@ -62,7 +62,7 @@ namespace Server
 
         /**
          * This method allows to insert a new name inside the test table
-         * of the PL_FEZ03 database.
+         * of the database.
          * 
          * @param name - The name that you want to insert
          * @returns True if the name was inserted, false otherwise.
@@ -85,7 +85,7 @@ namespace Server
 
         /**
          * This method allows to insert a new connection with a client inside
-         * the "clients" table of the PL_FEZ03 database.
+         * the database. A MAC address and a Port number are required.
          * 
          * @param MACAddress - The MAC address of the client.
          * @param port - The port that is used by the server for that connection.
@@ -120,8 +120,33 @@ namespace Server
         }
 
         /**
-         * This checks if exists a client inside the "clients" table
-         * of the PL_FEZ03 database with the specified MACAddress.
+         * This method should be used to store the information about a 
+         * suspicious picture snapped by the client inside the database.
+         * 
+         * @param MACAddress - The MAC address of the client.
+         * @param timestamp - A long representation of the moment of the snap.
+         * @param path - The path in which the picture was stored on the server.
+         * @returns True if the entry was succesfully inserted, false otherwise.
+         */
+        public bool insertSuspiciousPicturePath(String MACAddress, long timestamp, String path)
+        {
+            if (!connection_Opened) {
+                if (OpenConnect() == false)
+                    return false;
+            }
+
+            String query = "INSERT INTO suspicious_pictures(MAC, Timestamp, Path) VALUES('"+MACAddress+"', "+timestamp+", '"+path+"');";
+            int res = ExecuteNonQuery(query);
+           
+            if (res <= 0)
+                return false;
+            else
+                return true;
+        }
+
+        /**
+         * This checks if exists a specified client inside the database
+         * with the specified MACAddress.
          * 
          * @param MACAddress - The MAC address of the client.
          * @returns True if the client exists, false otherwise.
@@ -142,8 +167,9 @@ namespace Server
         }
 
         /**
-         * This method allows to remove a connection from
-         * the "clients" table of the PL_FEZ03 database.
+         * This method allows to remove a connection with a client
+         * from the database. It should be called when a device
+         * will go correctly down.
          * 
          * @param MACAddress - The MAC address of the client.
          * @returns True if the entry was succesfully removed, false otherwise.
@@ -166,12 +192,10 @@ namespace Server
         }
 
         /**
-         * This method removes all the entries 
-         * in the "clients" table of the PL_FEZ03 database.
+         * This method removes all the connection with the clients 
+         * from the database.
          * 
          * @returns True if the entries were succesfully removed, false otherwise.
-         * 
-         * probabilmente non funzionerà... semplice prova
          */
         public bool removeAllClient()
         {
