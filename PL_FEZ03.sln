@@ -6,6 +6,7 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BFA6CA90-FDB1-4C38-AF74-10A799474FBB}"
 	ProjectSection(SolutionItems) = preProject
 		exam-rules.txt = exam-rules.txt
+		pl_fez03.sql = pl_fez03.sql
 		tasks.txt = tasks.txt
 	EndProjectSection
 EndProject
