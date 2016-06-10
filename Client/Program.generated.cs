@@ -54,6 +54,7 @@ namespace Client {
             // Important to initialize the Mainboard first
             Program.Mainboard = new GHIElectronics.Gadgeteer.FEZSpider();
             Program p = new Program();
+            WindowsManager.getInstance(p);
             p.InitializeModules();
             p.ProgramStarted();
             // Starts Dispatcher

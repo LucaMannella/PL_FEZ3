@@ -34,15 +34,18 @@ namespace Client
             return ((string)(Microsoft.SPOT.ResourceUtility.GetObject(ResourceManager, id)));
         }
         [System.SerializableAttribute()]
+        internal enum StringResources : short
+        {
+            window_pin = -23392,
+            window_loading = -2759,
+            window_network_down = 18276,
+            window_setup_camera = 19777,
+        }
+        [System.SerializableAttribute()]
         internal enum FontResources : short
         {
             small = 13070,
             NinaB = 18060,
-        }
-        [System.SerializableAttribute()]
-        internal enum StringResources : short
-        {
-            window = 27311,
         }
     }
 }

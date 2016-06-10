@@ -124,23 +124,49 @@
   <data name="small" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\small.tinyfnt;System.Byte[], mscorlib, Culture=neutral, PublicKeyToken=null</value>
   </data>
-  <data name="window" xml:space="preserve">
+  <data name="window_loading" xml:space="preserve">
     <value>&lt;Glide Version="1.0.7"&gt;
-  &lt;Window Name="root_windows" Width="320" Height="240" BackColor="00000"&gt;
-    &lt;Button Name="button1" X="37" Y="40" Width="80" Height="32" Alpha="255" Text="1" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
-    &lt;Button Name="button2" X="126" Y="40" Width="80" Height="32" Alpha="255" Text="2" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
-    &lt;Button Name="button3" X="213" Y="40" Width="80" Height="32" Alpha="255" Text="3" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
-    &lt;Button Name="button5" X="126" Y="81" Width="80" Height="32" Alpha="255" Text="5" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
-    &lt;Button Name="button4" X="37" Y="81" Width="80" Height="32" Alpha="255" Text="4" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
-    &lt;Button Name="button7" X="37" Y="124" Width="80" Height="32" Alpha="255" Text="7" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
-    &lt;Button Name="button6" X="213" Y="81" Width="80" Height="32" Alpha="255" Text="6" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
-    &lt;Button Name="button8" X="126" Y="124" Width="80" Height="32" Alpha="255" Text="8" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
-    &lt;Button Name="button9" X="213" Y="124" Width="80" Height="32" Alpha="255" Text="9" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
-    &lt;PasswordBox Name="password_text" X="105" Y="206" Width="120" Height="32" Alpha="255" Text="" TextAlign="Left" Font="4" FontColor="000000"/&gt;
-    &lt;Button Name="button0" X="126" Y="167" Width="80" Height="32" Alpha="255" Text="0" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
-    &lt;Button Name="button_confirm" X="213" Y="167" Width="80" Height="32" Alpha="255" Text="OK" Font="4" FontColor="00FF30" DisabledFontColor="111111" TintColor="111111" TintAmount="0"/&gt;
-    &lt;Button Name="button_del" X="37" Y="167" Width="80" Height="32" Alpha="255" Text="DEL" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
-    &lt;TextBlock Name="instance34080" X="0" Y="0" Width="320" Height="32" Alpha="255" Text="INSERT YOUR PIN" TextAlign="center" TextVerticalAlign="center" Font="6" FontColor="2000B0" BackColor="000000" ShowBackColor="false"/&gt;
+  &lt;Window Name="instance115" Width="320" Height="240" BackColor="FFFFFF"&gt;
+    &lt;ProgressBar Name="progress" X="117" Y="100" Width="90" Height="16" Alpha="255" Direction="Right" MaxValue="100" Value="0"/&gt;
+    &lt;TextBlock Name="instance1072" X="127" Y="75" Width="100" Height="32" Alpha="255" Text="LOADING" TextAlign="Left" TextVerticalAlign="Top" Font="5" FontColor="0" BackColor="000000" ShowBackColor="False"/&gt;
+  &lt;/Window&gt;
+&lt;/Glide&gt;</value>
+  </data>
+  <data name="window_network_down" xml:space="preserve">
+    <value>&lt;Glide Version="1.0.7"&gt;
+  &lt;Window Name="instance115" Width="320" Height="240" BackColor="FFFFFF"&gt;
+    &lt;TextBox Name="instance353" X="0" Y="0" Width="320" Height="32" Alpha="255" Text="NETWORK DOWN" TextAlign="center" Font="6" FontColor="000000"/&gt;
+    &lt;TextBlock Name="instance1004" X="5" Y="40" Width="315" Height="50" Alpha="255" Text="Your Network is down, check your internet connection and  click retry" TextAlign="Left" TextVerticalAlign="Top" Font="4" FontColor="0" BackColor="000000" ShowBackColor="False"/&gt;
+    &lt;Button Name="btn_retry" X="115" Y="100" Width="80" Height="32" Alpha="255" Text="Retry" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+  &lt;/Window&gt;
+&lt;/Glide&gt;</value>
+  </data>
+  <data name="window_pin" xml:space="preserve">
+    <value>&lt;Glide Version="1.0.7"&gt;
+  &lt;Window Name="root_windows" Width="320" Height="240" BackColor="FFFFFF"&gt;
+    &lt;Button Name="button1" X="37" Y="70" Width="80" Height="32" Alpha="255" Text="1" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;Button Name="button2" X="126" Y="70" Width="80" Height="32" Alpha="255" Text="2" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;Button Name="button3" X="213" Y="70" Width="80" Height="32" Alpha="255" Text="3" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;Button Name="button5" X="126" Y="110" Width="80" Height="32" Alpha="255" Text="5" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;Button Name="button4" X="37" Y="110" Width="80" Height="32" Alpha="255" Text="4" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;Button Name="button7" X="37" Y="150" Width="80" Height="32" Alpha="255" Text="7" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;Button Name="button6" X="213" Y="110" Width="80" Height="32" Alpha="255" Text="6" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;Button Name="button8" X="126" Y="150" Width="80" Height="32" Alpha="255" Text="8" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;Button Name="button9" X="213" Y="150" Width="80" Height="32" Alpha="255" Text="9" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;PasswordBox Name="textpassword" X="105" Y="30" Width="120" Height="32" Alpha="255" Text="" TextAlign="Left" Font="4" FontColor="000000"/&gt;
+    &lt;Button Name="button0" X="126" Y="190" Width="80" Height="32" Alpha="255" Text="0" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;Button Name="button_ok" X="213" Y="190" Width="80" Height="32" Alpha="255" Text="OK" Font="4" FontColor="00FF70" DisabledFontColor="111111" TintColor="111111" TintAmount="0"/&gt;
+    &lt;Button Name="button_del" X="37" Y="190" Width="80" Height="32" Alpha="255" Text="DEL" Font="4" FontColor="FF2020" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;TextBlock Name="instance34080" X="0" Y="0" Width="320" Height="32" Alpha="255" Text="INSERT YOUR PIN" TextAlign="center" TextVerticalAlign="center" Font="6" FontColor="000000" BackColor="000000" ShowBackColor="false"/&gt;
+  &lt;/Window&gt;
+&lt;/Glide&gt;</value>
+  </data>
+  <data name="window_setup_camera" xml:space="preserve">
+    <value>&lt;Glide Version="1.0.7"&gt;
+  &lt;Window Name="instance115" Width="320" Height="240" BackColor="FFFFFF"&gt;
+    &lt;TextBox Name="instance438" X="0" Y="0" Width="320" Height="32" Alpha="255" Text="SETUP CAMERA" TextAlign="CENTER" Font="6" FontColor="000000"/&gt;
+    &lt;TextBlock Name="instance1077" X="5" Y="39" Width="315" Height="80" Alpha="255" Text="To get started, click next button and use the joystick to set the camera in the desired position" TextAlign="left" TextVerticalAlign="Top" Font="5" FontColor="0" BackColor="000000" ShowBackColor="False"/&gt;
+    &lt;Button Name="btn_next" X="115" Y="120" Width="80" Height="32" Alpha="255" Text="Next " Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
   &lt;/Window&gt;
 &lt;/Glide&gt;</value>
   </data>

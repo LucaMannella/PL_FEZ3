@@ -1,7 +1,7 @@
 ﻿CLIENT SIDE - GADGETEER
 --------------------------------------------------------------------------
 1) Richiesta al WS dei dati per la comunicazione			(fatto)
-2) Setup 													<--- da fare
+2) Setup 													<--- in progress
 3) Rilevare immagini dalla fotocamera 						(fatto)
 4) Algoritmo per le differenze tra i frame					(fatto)
 5) Inviare un'immagine al server							(fatto)
@@ -10,7 +10,7 @@
 	6b) allarme
 7) Ogni x secondi il client manda un keep alive				(fatto)
 	7.1) Se il server/service è unreacheable segnalarlo		<--- da fare
-8) Interfaccia pin											<--- da fare
+8) Interfaccia pin											(fatto)
 
  --- da aggiungere: ---
 1) aggiungere un volumetrico
@@ -27,7 +27,7 @@ SERVER SIDE
 2) Listening sul socket client								(fatto)
 	2.1) Memorizzare l'immagine iniziale					(fatto)
 	2.2) Ricevere immagini ed elaboro						(fatto)		
-	2.3) Memorizzare immagini sul database					<--- da fare
+	2.3) Memorizzare immagini sul database					(fatto)
 	2.4) Inviare risposta ai client							(fatto)
 	2.5) Inviare e-mail all'utente							(fatto)
 
