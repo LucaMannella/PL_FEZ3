@@ -77,7 +77,7 @@ namespace Client
 
            // camera.StartStreaming();
 
-           
+            joystick.Calibrate();
             GT.Timer timer_joystick = new GT.Timer(100);
             timer_joystick.Tick += joystick_function;
             timer_joystick.Start();
@@ -154,7 +154,7 @@ namespace Client
                 return;
             }
             serverEndPoint = new IPEndPoint(ipAddress, port);
-            
+
             GT.Timer timer_keepAlive = new GT.Timer(10000);
             timer_keepAlive.Tick += keepAlive;
             //timer_keepAlive.Start();
@@ -173,17 +173,17 @@ namespace Client
                 port = int.Parse(connectionInfo[1]),
             });
 
-            Debug.Print("keepAlive return: " +data.keepAliveResult.ToString());         
+            Debug.Print("keepAlive return: " +data.keepAliveResult.ToString());
         }
 
       
         private void bindProxyService()
         {
             Debug.Print("Binding proxy service...");
-            proxy = new IService1ClientProxy(new WS2007HttpBinding(),new ProtocolVersion11());
+             proxy = new IService1ClientProxy(new WS2007HttpBinding(),new ProtocolVersion11());
 
             // NOTE: the endpoint needs to match the endpoint of the servicehost
-            proxy.EndpointAddress = SERVICE_ADDR;
+             proxy.EndpointAddress = SERVICE_ADDR;
 
             Debug.Print("Binding proxy service COMPLETE");
         }
@@ -216,7 +216,7 @@ namespace Client
             StopMe = true;      //stopping keep alive thread
            // ScattaAllarme();
         }
-       
+
 // ----------------------- End Network & Connections ----------------------- //
 
         private void joystick_function(GT.Timer timer)
@@ -226,7 +226,7 @@ namespace Client
             double newX = joystickPosition.X;
             double newY = joystickPosition.Y;
             joystickPosition = newJoystickPosition;
-
+       
 
             // did we actually move...
             if (System.Math.Abs(newX) >= 0.05)
