@@ -75,6 +75,7 @@ namespace Client
 
             camera.StartStreaming();
 
+            joystick.Calibrate();
             GT.Timer timer_joystick = new GT.Timer(100);
             timer_joystick.Tick += joystick_function;
             timer_joystick.Start();
