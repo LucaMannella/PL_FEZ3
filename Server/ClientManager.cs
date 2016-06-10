@@ -13,23 +13,29 @@ namespace Server
 {
     class ClientManager
     {
-        private String myMac;
-        private int porta;
-        int cont = 0;
-        MotionDetector3Optimized motionDetector;
-        byte[] referenceBitmap;
-        //oppure usare:
-        //MotionDetector4 motionDetector = new MotionDetector4();
-        System.Drawing.Bitmap lastFrame = null;
-        //grandezza immagine che mi aspetto di ricevere
-        long lungImage = 230454;
-        //livello che dice quando far scattare allarme ed è compreso tra 0 e 1
-        private double alarmLevel = 0.005;
+        private static readonly DateTime Jan1st1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
         private const string OK = "200OK\0";
         private const string UNKNOW_COMMND = "400BAD_REQUEST-";
         private const string ALARM = "yes-";
         private const string NOALARM = "no-";
-        private long lasttime = 0;
+
+        MotionDetector3Optimized motionDetector;
+        //oppure usare:
+        //MotionDetector4 motionDetector = new MotionDetector4();
+
+        byte[] referenceBitmap;
+        System.Drawing.Bitmap lastFrame = null;
+
+        long lungImage = 230454;    //grandezza immagine che mi aspetto di ricevere
+
+        //livello che dice quando far scattare allarme ed è compreso tra 0 e 1
+        private double alarmLevel = 0.005;
+
+        int cont = 0;
+        private String myMac;
+        private int porta;
+        private long lastTime = 0;
         private Database mDatabase;
 
         public ClientManager(String mac, int porta)
@@ -38,47 +44,40 @@ namespace Server
             this.porta = porta;
             this.motionDetector = new MotionDetector3Optimized();
             this.mDatabase = Database.getInstance();
-
         }
-
 
         public void start()
         {
+            bool result;
             Socket handlerClient;
-            IPAddress ip = IPAddress.Parse("192.168.137.1");
+            IPAddress ip = IPAddress.Parse(Constants.SERVER_IP_ADDR);
             IPEndPoint localEndPoint = new IPEndPoint(ip, porta);
             Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             
-            mDatabase.OpenConnect();
-            bool result = mDatabase.insertClient(this.myMac, this.porta);
-            mDatabase.CloseConnect();
+            result = mDatabase.insertClient(this.myMac, this.porta);
 
-            if(!result){
+            if(!result) {
                 Console.WriteLine("Error: Impossible to save new client in db");
+                return;
             }
 
-            try
-            {
-
+            try {
                 Thread keepalive = new Thread(() => checkKeepAlive());
                 keepalive.Start();
 
                 listener.Bind(localEndPoint);
-                listener.Listen(2);
-
-                // Start listening for connections.
+                listener.Listen(2); // Start listening for connections.
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 Console.WriteLine("Unexpected Error");
                 Console.WriteLine("Source : " + e.Source);
                 Console.WriteLine("Message : " + e.Message);
                 return;
             }
+
                 while (true)
                 {
-                    try
-                    {
+                try {
                         Console.WriteLine("Waiting for a connection..." + "from client: " + this.myMac + "on port:" + porta);
                         Console.WriteLine("");
                         // Program is suspended while waiting for an incoming connection.
@@ -96,7 +95,7 @@ namespace Server
                                 if (macaddr2.Equals(this.myMac))
                                 {
                                     Console.WriteLine("Received keepalive from: " + macaddr2 + "at: " + time);
-                                    lasttime = Int64.Parse(time);
+                                lastTime = Int64.Parse(time);
                                 }
                                 
                                 byte[] toSend = System.Text.Encoding.UTF8.GetBytes(OK);
@@ -110,7 +109,6 @@ namespace Server
                                 Thread thread = new Thread(() => elaborazione(current1, clientsock));
                                 thread.Start();
                                 break;
-
 
                             case "manageImage\0":
                                 Console.WriteLine("Received image from: " + myMac);
@@ -126,15 +124,14 @@ namespace Server
                                 clientsock.Close();
                                 break;
                         }
-
                     }
-                    catch (Exception e)
-                    {
+                catch (Exception e) {
                         Console.WriteLine("Unexpected Error");
                         Console.WriteLine("Source : " + e.Source);
                         Console.WriteLine("Message : " + e.Message);
                     }
                 }
+
         }
 
 
@@ -146,12 +143,12 @@ namespace Server
 
         private void checkKeepAlive()
         {
-            Boolean check= true;
+            Boolean check = true;
 
             while (check)
             {
-                if(lasttime != 0){
-                    if (CurrentTimeMillis() - lasttime > 20000)
+                if(lastTime != 0) {
+                    if (CurrentTimeMillis() - lastTime > 20000)
                     {
                         String subject = "Warning client disconnected";
                         String message = "The client: " + myMac.Remove(myMac.Length - 1) + " is shut down at: " + DateTime.Now.ToLongTimeString() +" of: " + DateTime.Now.ToLongDateString();
@@ -159,7 +156,6 @@ namespace Server
                         break;
                     }
                 }
-                
             }
 
         }
@@ -170,7 +166,6 @@ namespace Server
             //abilito il calcolo
             motionDetector.MotionLevelCalculation = true;
             processImage(current, socket);
-
         }
 
         private void processImage(System.Drawing.Bitmap current, MySocket socket)
@@ -204,6 +199,8 @@ namespace Server
                     socket.Close();
                 }
             }
+
+            return;
         }
 
 
@@ -211,10 +208,10 @@ namespace Server
         {
             byte[] buffer = new byte[lung];
 
-
             long totRicevuti = 0;
             int ricevuti = -1;
             long mancanti = lung - totRicevuti;
+
             while ((mancanti = lung - totRicevuti) > 0)
             {
                 if (mancanti >= lung)
@@ -224,24 +221,22 @@ namespace Server
                 totRicevuti += ricevuti;
             }
 
-
             var imageConverter = new ImageConverter();
             var image = (Image)imageConverter.ConvertFrom(buffer);
             Bitmap a = new Bitmap(image);
-            a.Save(@"C:\Users\Alfonso-LAPTOP\Desktop\image" + cont + ".jpg");
+            a.Save(Constants.IMAGE_DIRECTORY + cont + ".jpg");
             cont++;        
             return a;
-
         }
 
         public byte[] receiveFileAsByteArray(long lung, Socket s)
         {
             byte[] buffer = new byte[lung];
 
-
             long totRicevuti = 0;
             int ricevuti = -1;
             long mancanti = lung - totRicevuti;
+
             while ((mancanti = lung - totRicevuti) > 0)
             {
                 if (mancanti >= lung)
@@ -251,16 +246,14 @@ namespace Server
                 totRicevuti += ricevuti;
             }
 
-
             return buffer;
-
         }
 
         private void sendMail(String subject, String message, String attachmentFilename)
         {
-            var fromAddress = new MailAddress("fez03noreply@gmail.com", "From Name");
-            var toAddress = new MailAddress("valenzise@tiscali.it", "To Name");
-            String fromPassword = "fez03password";
+            var fromAddress = new MailAddress(Constants.MAIL_SENDER, "From Name");
+            var toAddress = new MailAddress(Constants.MAIL_RECEIVER, "To Name");
+            String fromPassword = Constants.MAIL_SENDER_PASSWORD;
 
             SmtpClient smtpclient = new SmtpClient();
 
@@ -270,7 +263,6 @@ namespace Server
             smtpclient.DeliveryMethod = SmtpDeliveryMethod.Network;
             smtpclient.UseDefaultCredentials = false;
             smtpclient.Credentials = new NetworkCredential(fromAddress.Address, fromPassword);
-
 
             MailMessage mymailmex = new MailMessage(fromAddress, toAddress);
             mymailmex.Subject = subject;
@@ -287,22 +279,19 @@ namespace Server
             {
                 Console.WriteLine(e.Message);
             }
-           
-            
         }
 
 
         public string receiveString(Socket socket)
         {
-
             byte[] buffer = new byte[1000];
             int ricevuti = 0;
             char vOut = 'a';
+
             while (vOut != '-')
             {
                 ricevuti += socket.Receive(buffer, ricevuti, 1, SocketFlags.None);
                 vOut = Convert.ToChar(buffer[ricevuti - 1]);
-
             }
 
             byte[] buf = new byte[ricevuti];
@@ -315,17 +304,11 @@ namespace Server
             return System.Text.Encoding.UTF8.GetString(buf);
         }
 
-        private static readonly DateTime Jan1st1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-
         public static long CurrentTimeMillis()
         {
             return (long)(DateTime.UtcNow - Jan1st1970).TotalMilliseconds;
         }
 
-
     }
-
-    
-
 
 }

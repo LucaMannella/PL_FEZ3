@@ -11,12 +11,11 @@ using System.Threading;
 
 namespace FinalService
 {
-
     [ServiceBehavior(AddressFilterMode = AddressFilterMode.Any)]
     public class Service1 : IService1
     {
-        private const string IPADDR = "192.168.137.1";
-        private const int PORT = 1500;
+        private static readonly DateTime Jan1st1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
         private const string GETPORT = "getPort\0";
         private const string KEEPALIVE = "keep-";
         private const string OK = "200OK";
@@ -28,19 +27,15 @@ namespace FinalService
             Socket clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             
             // Addressing
-            IPAddress ipAddress = IPAddress.Parse(IPADDR);
-            IPEndPoint serverEndPoint = new IPEndPoint(ipAddress, PORT);
+            IPAddress ipAddress = IPAddress.Parse(Constants.SERVER_IP_ADDR);
+            IPEndPoint serverEndPoint = new IPEndPoint(ipAddress, Constants.PORT);
             
             clientSocket.Connect(serverEndPoint);
 
             byte[] toSend = System.Text.Encoding.UTF8.GetBytes(GETPORT);
-
             byte[] toSend2 = System.Text.Encoding.UTF8.GetBytes((myMacAddress+'\0'));
-            
-
             byte[] bufferReceive = new byte[1000];
-
-           
+                       
             Send(clientSocket, toSend, 0, toSend.Length, 5000);
             Send(clientSocket, toSend2, 0, toSend2.Length, 5000);
 
@@ -48,31 +43,15 @@ namespace FinalService
 
             clientSocket.Close();
 
-            AddressResponse response = new AddressResponse(IPADDR, port.Remove(port.Length - 1), CurrentTimeMillis());
-            /*
-            bRet[0] = IPADDR;
-            bRet[1] = port.Remove(port.Length - 1);
-            bRet[2] = CurrentTimeMillis().ToString();
-            */
-            /*
-            byte[] buf = new byte[byterecived];
-
-            for(int i=0; i<byterecived; i++){
-                buf[i] = bufferReceive[i];
-            }
-
-          */
+            AddressResponse response = new AddressResponse(Constants.SERVER_IP_ADDR, port.Remove(port.Length - 1), CurrentTimeMillis());
 
             return response;
         }
-
-        private static readonly DateTime Jan1st1970 = new DateTime (1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
         public static long CurrentTimeMillis()
         {
             return (long)(DateTime.UtcNow - Jan1st1970).TotalMilliseconds;
         }
-
 
         public Boolean keepAlive(string myMacAddress, long mycurrentTime, int port)
         {
@@ -80,7 +59,7 @@ namespace FinalService
             Socket clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
             // Addressing
-            IPAddress ipAddress = IPAddress.Parse(IPADDR);
+            IPAddress ipAddress = IPAddress.Parse(Constants.SERVER_IP_ADDR);
             IPEndPoint serverEndPoint = new IPEndPoint(ipAddress, port);
 
             byte[] bufferReceive = new byte[1000];
@@ -189,7 +168,6 @@ namespace FinalService
                     else
                         throw ex;  // any serious error occurr
                 } 
-
             }
 
             byte[] buf = new byte[ricevuti];

@@ -41,6 +41,7 @@
   <ItemGroup>
     <Compile Include="ByteExtensions.cs" />
     <Compile Include="BaseWindow.cs" />
+    <Compile Include="MainWindow.cs" />
     <Compile Include="PinWindow.cs" />
     <Compile Include="Program.generated.cs">
       <AutoGen>True</AutoGen>
@@ -140,5 +141,14 @@
     </None>
     <None Include="Resources\NinaB.tinyfnt" />
     <None Include="Resources\small.tinyfnt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\PressedButton.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Image1.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\NormalButton.jpg" />
   </ItemGroup>
 </Project>

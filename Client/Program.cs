@@ -19,6 +19,7 @@ using Gadgeteer.Modules.GHIElectronics;
 using Gadgeteer.SocketInterfaces;
 using Ws.Services.Binding;
 using Ws.Services;
+using MainWindowExample;
 
 namespace Client
 {
@@ -34,24 +35,23 @@ namespace Client
         public const String FIRST_IMAGE_COMMAND = "firstImage-";
         String[] connectionInfo = { DEFAULT_DESTINATION_IP, DEFAULT_PORT };
 
-        long servertime = 0;
-        
-        IService1ClientProxy proxy;
-
-        IPEndPoint serverEndPoint = null;  // represent the connection with the server
-
         private DigitalInput pir_sensor = null;
         private PwmOutput buzzer_sensor = null;
         private bool scatta_allarme = false;
         private PwmOutput movimento_orizzontale=null,movimento_verticale=null;
         private Joystick.Position joystickPosition;
         private double current_orizzontal_pos = 0, current_vertical_pos=0;
+
         private string myMac;
         Bitmap bitmapA = null;
         Int32 RGlobal;
         Int32 PreviousAverage;
+        long servertime = 0;
 
         private Boolean StopMe = false;
+
+        IService1ClientProxy proxy;
+        IPEndPoint serverEndPoint = null;  // represent the connection with the server
 
         /**
          * This method is run when the mainboard is powered up or reset.   
@@ -61,7 +61,7 @@ namespace Client
             Debug.Print("Program Started");     // to show messages in "Output" window during debugging
             Mainboard.SetDebugLED(true);
 
-            Thread.Sleep(10000);
+            Thread.Sleep(2000);
             InitSensors();
             
             SetupEthernet();
@@ -73,18 +73,36 @@ namespace Client
             camera.BitmapStreamed += camera_BitmapStreamed;
             button.ButtonPressed += button_ButtonPressed;
 
-            camera.StartStreaming();
+           // camera.StartStreaming();
 
             joystick.Calibrate();
             GT.Timer timer_joystick = new GT.Timer(100);
             timer_joystick.Tick += joystick_function;
             timer_joystick.Start();
 
-
             GT.Timer timer_pir = new GT.Timer(5000);
             timer_pir.Tick += PirDetection;
+
+            SetupWindow();
             //timer_pir.Start();   
         }
+
+        private void SetupWindow()
+        {
+            Window window = displayT35.WPFWindow;
+            Font baseFont = Resources.GetFont(Resources.FontResources.NinaB);
+
+            MainWindow mainWindow = new MainWindow();
+            mainWindow.AddTitleBar("MainWindow Example (by Marco Minerva)", baseFont,
+                        GT.Color.White, GT.Color.Blue, GT.Color.White);
+
+            Text txtMessage = new Text(baseFont, "Custom StatusBar message");
+          
+            mainWindow.AddStatusBar(txtMessage, GT.Color.LightGray);
+
+            window.Child = mainWindow;
+        }
+
 
 
 // ------------------------- Network & Connections ------------------------- //
@@ -104,68 +122,25 @@ namespace Client
             ListNetworkInterfaces();
 
             bindProxyService();
-            
             getAddressAndPort();
-
 
             // Addressing
             IPAddress ipAddress = IPAddress.Parse(connectionInfo[0]);
             int port = int.Parse( connectionInfo[1] );
+            if (port == -1)
+            {
+                Debug.Print("Error: Invalid Port, impossible to establish a connection!\n");
+
+                //terminare applicazione
+                return;
+            }
             serverEndPoint = new IPEndPoint(ipAddress, port);
 
-            
             GT.Timer timer_keepAlive = new GT.Timer(10000);
             timer_keepAlive.Tick += keepAlive;
             //timer_keepAlive.Start();
-
-
-            // Starting keep alive thread
-         //   new Thread(this.keepAlive).Start();
         }
 
-        private void joystick_function(GT.Timer timer)
-        {
-            double realX = 0, realY = 0;
-            Joystick.Position newJoystickPosition = joystick.GetPosition();
-            double newX = joystickPosition.X;
-            double newY = joystickPosition.Y;
-            joystickPosition = newJoystickPosition;
-
-
-            // did we actually move...
-            if (System.Math.Abs(newX) >= 0.05) 
-            {
-                realX = newX;
-            }
-            if (System.Math.Abs(newY) >= 0.05)
-            {
-                realY = newY;
-            }
-            if (realX == 0.0 && realY == 0.0) 
-                return;
-            if(System.Math.Abs(newX)>=System.Math.Abs(newY))
-            {
-                if (current_orizzontal_pos + realX / 80 <= 0.1 && current_orizzontal_pos + realX / 80 >= 0.05)
-                {
-                    movimento_orizzontale.Set(50, current_orizzontal_pos + realX / 80);
-                    current_orizzontal_pos = current_orizzontal_pos + realX / 80;
-                }                
-            }
-            else
-            {
-                if (current_vertical_pos + realY / 80 <= 0.1 && current_vertical_pos + realY / 80 >= 0.05)
-                {
-                    movimento_verticale.Set(50, current_vertical_pos + realY / 80);
-                    current_vertical_pos = current_vertical_pos + realY / 80;
-                }                
-            }
-        }
-
-        private void takePicture(GT.Timer timer)
-        {
-            if(camera.CameraReady)
-                camera.TakePicture();
-        }
 
         private void keepAlive(GT.Timer timer)
         {
@@ -177,15 +152,12 @@ namespace Client
                 myMacAddress = myMac,
                 mycurrentTime = servertime,
                 port = int.Parse(connectionInfo[1]),
-
             });
 
             Debug.Print("keepAlive return: " +data.keepAliveResult.ToString());
-            
         }
 
       
-
         private void bindProxyService()
         {
             Debug.Print("Binding proxy service...");
@@ -195,8 +167,8 @@ namespace Client
              proxy.EndpointAddress = SERVICE_ADDR;
 
             Debug.Print("Binding proxy service COMPLETE");
-
         }
+
 
         private void getAddressAndPort()
         {
@@ -226,9 +198,51 @@ namespace Client
            // ScattaAllarme();
         }
 
-       
 // ----------------------- End Network & Connections ----------------------- //
 
+        private void joystick_function(GT.Timer timer)
+        {
+            double realX = 0, realY = 0;
+            Joystick.Position newJoystickPosition = joystick.GetPosition();
+            double newX = joystickPosition.X;
+            double newY = joystickPosition.Y;
+            joystickPosition = newJoystickPosition;
+       
+
+            // did we actually move...
+            if (System.Math.Abs(newX) >= 0.05)
+            {
+                realX = newX;
+            }
+            if (System.Math.Abs(newY) >= 0.05)
+            {
+                realY = newY;
+            }
+            if (realX == 0.0 && realY == 0.0)
+                return;
+            if (System.Math.Abs(newX) >= System.Math.Abs(newY))
+            {
+                if (current_orizzontal_pos + realX / 80 <= 0.1 && current_orizzontal_pos + realX / 80 >= 0.05)
+                {
+                    movimento_orizzontale.Set(50, current_orizzontal_pos + realX / 80);
+                    current_orizzontal_pos = current_orizzontal_pos + realX / 80;
+                }
+            }
+            else
+            {
+                if (current_vertical_pos + realY / 80 <= 0.1 && current_vertical_pos + realY / 80 >= 0.05)
+                {
+                    movimento_verticale.Set(50, current_vertical_pos + realY / 80);
+                    current_vertical_pos = current_vertical_pos + realY / 80;
+                }
+            }
+        }
+
+        private void takePicture(GT.Timer timer)
+        {
+            if (camera.CameraReady)
+                camera.TakePicture();
+        }
 
 // -------------------------------- Sensori -------------------------------- //
         private void InitSensors()

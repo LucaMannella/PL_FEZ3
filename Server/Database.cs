@@ -15,10 +15,7 @@ namespace Server
         bool connection_Opened = false;
         private static Database myInstance = null;
 
-        private Database()
-        {
-
-        }
+        private Database() {    /* empty default private constructor */    }
 
         public static Database getInstance()
         {
@@ -90,17 +87,18 @@ namespace Server
          * This method allows to insert a new connection with a client inside
          * the "clients" table of the PL_FEZ03 database.
          * 
-         * @param name - The name that you want to insert
-         * @returns True if the name was inserted, false otherwise.
+         * @param MACAddress - The MAC address of the client.
+         * @param port - The port that is used by the server for that connection.
+         * @returns True if the entry was succesfully inserted, false otherwise.
          */
         public bool insertClient(String MACAddress, int port)
         {
+            int res = -1;
+
             if (!connection_Opened) {
                 if (OpenConnect() == false)
                     return false;
             }
-
-            int res = -1;
 
             String query = "SELECT * FROM clients WHERE MAC = '"+MACAddress+"';";
             DataRowCollection records = GetRowsWhithQuery(query, "clients");
@@ -122,7 +120,78 @@ namespace Server
         }
 
         /**
-         * This method execute a non-query on the database (INSERT, UPDATE, REMOVE).
+         * This checks if exists a client inside the "clients" table
+         * of the PL_FEZ03 database with the specified MACAddress.
+         * 
+         * @param MACAddress - The MAC address of the client.
+         * @returns True if the client exists, false otherwise.
+         */
+        public bool existClient(String MACAddress) 
+        {
+            if (!connection_Opened) {
+                if (OpenConnect() == false)
+                    return false;
+            }
+
+            String query = "SELECT * FROM clients WHERE MAC = '"+MACAddress+"';";
+            DataRowCollection records = GetRowsWhithQuery(query, "clients");
+            if (records.Count <= 0)
+                return false;
+            else
+                return true;
+        }
+
+        /**
+         * This method allows to remove a connection from
+         * the "clients" table of the PL_FEZ03 database.
+         * 
+         * @param MACAddress - The MAC address of the client.
+         * @returns True if the entry was succesfully removed, false otherwise.
+         */
+        public bool removeClient(String MACAddress)
+        {
+            if (!connection_Opened)
+            {
+                if (OpenConnect() == false)
+                    return false;
+            }
+
+            String query = "DELETE FROM clients WHERE MAC = '" + MACAddress + "';";
+            int res = ExecuteNonQuery(query);
+
+            if (res <= 0)
+                return false;
+            else
+                return true;
+        }
+
+        /**
+         * This method removes all the entries 
+         * in the "clients" table of the PL_FEZ03 database.
+         * 
+         * @returns True if the entries were succesfully removed, false otherwise.
+         * 
+         * probabilmente non funzionerà... semplice prova
+         */
+        public bool removeAllClient()
+        {
+            if (!connection_Opened)
+            {
+                if (OpenConnect() == false)
+                    return false;
+            }
+
+            String query = "DELETE FROM clients;";
+            int res = ExecuteNonQuery(query);
+
+            if (res <= 0)
+                return false;
+            else
+                return true;
+        }
+
+        /**
+         * This method execute a non-query on the database (INSERT, UPDATE, DELETE).
          * It returns -1 in case of error.
          */
         public int ExecuteNonQuery(string query)
@@ -167,6 +236,8 @@ namespace Server
             }
         }
 
+
+// from here methods actually not used
         /**
          * This method prevent some SQL injections
          */
@@ -175,6 +246,9 @@ namespace Server
             return MySqlHelper.EscapeString(s);
         }
 
+        /**
+         * This method should be used to manage a transaction.
+         */ 
         public MySqlTransaction getTransaction()
         {
             MySqlTransaction t;
@@ -182,8 +256,6 @@ namespace Server
             return t;
         }
 
-
-// actually not used methods
         public int ExecuteNonQuery(string query, byte[] bytes)
         {
             //query = query.Replace("\\", "\\\\");

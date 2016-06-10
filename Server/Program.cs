@@ -12,60 +12,72 @@ namespace Server
     class Program
     {
         MySocket s;
+        private static Database db;
 
-        private static string IPADDR = "192.168.137.1";
-        private int startingport = 1501;
+        private int startingport = Constants.PORT + 1;
         private int progressiveport = 0;
         private const string OK = "200OK\0";
 
-        
+        /**
+         * The entry point of the server.
+         */ 
         static void Main(string[] args)
         {
-            Program p = new Program(); 
+            db = Database.getInstance();
+            db.OpenConnect();
+
+            if (db.removeAllClient())
+                Console.WriteLine("The database was succesfully initialized!");
+            else
+                Console.WriteLine("Warning: Problem in database initialization...\n" +
+                            "if it is the first time that you start our system, ignore this warning!");
+
+            Program p = new Program();
             p.StartListening();
         }
 
+        /**
+         * This method create a socket and start listening for clients requests.
+         */ 
         private void StartListening()
         {
             Socket handler;
-            IPAddress ip = IPAddress.Parse(IPADDR);
+            IPAddress ip = IPAddress.Parse(Constants.SERVER_IP_ADDR);
             IPEndPoint localEndPoint = new IPEndPoint(ip, 1500);
             //IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, 1500);            
             // Create a TCP/IP socket.
             Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);            
 
-            try
-            {
+            try {
                 listener.Bind(localEndPoint);
                 listener.Listen(10);
                
                 // Start listening for connections.
-
                 while (true)
                 {
                     Console.WriteLine("Waiting for a connection...");
                     // Program is suspended while waiting for an incoming connection.
-                    handler = listener.Accept();                    
+                    handler = listener.Accept();
                    
                     s = new MySocket(handler);
-                    ThreadStart threadDelegate = new ThreadStart(manageCommand);
-                    Thread newThread = new Thread(threadDelegate);
-                    newThread.Start();
-                     
+                    
+                    new Thread(manageCommand).Start();
                 }
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 Console.WriteLine("Unexpected Error");
                 Console.WriteLine("Source : " + e.Source);
                 Console.WriteLine("Message : " + e.Message);
-                return;
+            }
+            finally {
+                db.CloseConnect();
             }
         }
 
-
-
-        private void manageCommand(){
+        /**
+         * This method manage the execution of a client request.
+         */ 
+        private void manageCommand() {
             String cmd = s.receiveString();
             switch (cmd)
             {
@@ -74,56 +86,47 @@ namespace Server
                     String macaddr = s.receiveString();
                     Console.WriteLine(macaddr);
 
-                    int port = startingport + progressiveport;
-                    progressiveport++;
+                    String macToCheck = macaddr.Substring(0, macaddr.Length-1);
 
-                    Thread thread = new Thread(() => manageNewClient(macaddr, port));
-                    thread.Start();
+                    if (!db.existClient(macToCheck))
+                    {
+                        int port = startingport + progressiveport;
+                        progressiveport++;
 
+                        sendPort(port);     //ToDo: problema! Se il mac è invalido come lo segnaliamo prima di
+                                            // rispondere al client?!?!
+
+                        // This method manage the comunication between this client and the server.
+                        ClientManager client = new ClientManager(macaddr, port);
+                        client.start();
+
+                        Console.WriteLine("Client: " + macaddr + " on port: " + port + " has ended!\n");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Error: Device: " + macaddr + " it is already present in the database!\n");
+                        sendPort(-1);
+                    }
+
+                    break;
                     
-                    sendPort(port);
-
-                    break;
-                case "keepAlive\0":
-                    Console.WriteLine(cmd);
-                    String macaddr2 = s.receiveString();
-                    String time = s.receiveString();
-                    Console.WriteLine("Received keepalive from: "+ macaddr2 + "at: " +time);
-
-                    //TODO check keepalive
-
-                    byte[] toSend = System.Text.Encoding.UTF8.GetBytes(OK);
-                    s.Send(toSend, toSend.Length, SocketFlags.None);
-                    break;
                 default:
                     break;
             }
-            
-
         }
-
+ 
+        /**
+         * This method sends to the client the port that must be used
+         * to contact the server.
+         */ 
         private void sendPort(int port)
         {
             string myString = port.ToString() + '\0';
-
-
             byte[] toSend = System.Text.Encoding.UTF8.GetBytes(myString);
 
-
             s.Send(toSend, toSend.Length, SocketFlags.None);
-
         }
 
-        private void manageNewClient(string macaddr, int port)
-        {
-            ClientManager client = new ClientManager(macaddr, port);
-            client.start();
-
-        }
-
-       
-
-
-  
     }
+
 }
