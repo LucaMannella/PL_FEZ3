@@ -50,18 +50,10 @@ namespace Server
 
         public void start()
         {
-            bool result;
             Socket handlerClient;
             IPAddress ip = IPAddress.Parse(Constants.SERVER_IP_ADDR);
             IPEndPoint localEndPoint = new IPEndPoint(ip, porta);
             Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            
-            result = mDatabase.insertClient(this.myMac, this.porta);
-
-            if(!result) {
-                Console.WriteLine("Error: Impossible to save new client in db!");
-                return;
-            }
 
             try {
                 Thread keepalive = new Thread(() => checkKeepAlive());

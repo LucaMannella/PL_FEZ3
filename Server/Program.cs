@@ -34,6 +34,9 @@ namespace Server
 
             Program p = new Program();
             p.StartListening();
+
+            db.CloseConnect();
+            return;
         }
 
         /**
@@ -93,8 +96,14 @@ namespace Server
                         int port = startingport + progressiveport;
                         progressiveport++;
 
-                        sendPort(port);     //ToDo: problema! Se il mac è invalido come lo segnaliamo prima di
-                                            // rispondere al client?!?!
+                        Boolean ok = db.insertClient(macaddr, port);
+                        if (!ok) {
+                            Console.WriteLine("Error: Impossible to save new client in db!");
+                            sendPort(-1);
+                            return;
+                        }
+
+                        sendPort(port);
 
                         // This method manage the comunication between this client and the server.
                         ClientManager client = new ClientManager(macaddr, port);
