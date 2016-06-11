@@ -1,5 +1,5 @@
 Projects and laboratory on communication systems
-07/06/2016 - Prof. Guido Albertengo
+07-09/06/2016 - Prof. Guido Albertengo
 
 EXAM REQUIREMENTS:
 
@@ -13,4 +13,10 @@ During the exam you will be asked to:
 2) Demonstrate the project
 3) Answer some questions concerning the project and the demo
 
+4) Print your report
+5) Make a copy of ALL your files on a CD
+
 Groups willing to be examined the same day of the call are kindly requested to send the report two days in advance.
+
+
+Albertengo 
