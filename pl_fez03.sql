@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Giu 10, 2016 alle 13:09
+-- Generation Time: Giu 14, 2016 alle 22:06
 -- Versione del server: 5.6.24
 -- PHP Version: 5.6.8
 
@@ -18,11 +18,14 @@ SET time_zone = "+00:00";
 --
 -- Database: `pl_fez03`
 --
+CREATE DATABASE IF NOT EXISTS `pl_fez03` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+USE `pl_fez03`;
 -- --------------------------------------------------------
 
 --
 -- Struttura della tabella `clients`
 --
+DROP TABLE IF EXISTS `clients`;
 CREATE TABLE IF NOT EXISTS `clients` (
   `MAC` varchar(17) NOT NULL,
   `Port` int(10) unsigned NOT NULL
@@ -32,6 +35,7 @@ CREATE TABLE IF NOT EXISTS `clients` (
 --
 -- Struttura della tabella `suspicious_pictures`
 --
+DROP TABLE IF EXISTS `suspicious_pictures`;
 CREATE TABLE IF NOT EXISTS `suspicious_pictures` (
   `MAC` char(17) NOT NULL,
   `Timestamp` bigint(20) NOT NULL,
@@ -42,6 +46,7 @@ CREATE TABLE IF NOT EXISTS `suspicious_pictures` (
 --
 -- Struttura della tabella `test`
 --
+DROP TABLE IF EXISTS `test`;
 CREATE TABLE IF NOT EXISTS `test` (
   `ID` int(11) NOT NULL,
   `Name` varchar(30) NOT NULL
@@ -54,13 +59,14 @@ INSERT INTO `test` (`ID`, `Name`) VALUES
 (1, 'Alfonso'),
 (2, 'Luca');
 
+
 --
 -- Indexes for table `clients`
 --
 ALTER TABLE `clients`
   ADD PRIMARY KEY (`MAC`);
 
---
+  --
 -- Indexes for table `suspicious_pictures`
 --
 ALTER TABLE `suspicious_pictures`
