@@ -36,7 +36,7 @@ namespace Client
         public const String KEEP_ALIVE_COMMAND = "keepAlive-";
         public const String MANAGE_IMAGE_COMMAND = "manageImage-";
         public const String FIRST_IMAGE_COMMAND = "firstImage-";
-        private const string ALARM = "yes-";
+        private const string ALARM = "yes";
         private const string NOALARM = "no-";
         String[] connectionInfo = { DEFAULT_DESTINATION_IP, DEFAULT_PORT };
 
