@@ -20,9 +20,9 @@ namespace Server
         private const string ALARM = "yes-";
         private const string NOALARM = "no-";
 
-        MotionDetector3Optimized motionDetector;
+       // MotionDetector3Optimized motionDetector;
         //oppure usare:
-        //MotionDetector4 motionDetector = new MotionDetector4();
+        MotionDetector4 motionDetector;
 
         byte[] referenceBitmap;
         System.Drawing.Bitmap lastFrame = null;
@@ -30,7 +30,7 @@ namespace Server
         long lungImage = 230454;    //grandezza immagine che mi aspetto di ricevere
 
         //livello che dice quando far scattare allarme ed è compreso tra 0 e 1
-        private double alarmLevel = 0.005;
+        private double alarmLevel = 0.01;
 
         int cont = 0;
         private String myMac;
@@ -43,7 +43,7 @@ namespace Server
         {
             this.myMac = mac;
             this.porta = porta;
-            this.motionDetector = new MotionDetector3Optimized();
+            this.motionDetector = new MotionDetector4();
             this.mDatabase = Database.getInstance();
         }
 

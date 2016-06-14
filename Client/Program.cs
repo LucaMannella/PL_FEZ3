@@ -15,12 +15,14 @@ using System.Net.Sockets;
 using System.Net;
 using System.Text;
 using Gadgeteer.Modules.GHIElectronics;
-using Gadgeteer.SocketInterfaces;
 using Ws.Services.Binding;
 using Ws.Services;
+/*
 using GHI.Glide;
 using GHI.Glide.Display;
 using GHI.Glide.UI;
+ */
+using Gadgeteer.SocketInterfaces;
 
 namespace Client
 {
@@ -34,6 +36,8 @@ namespace Client
         public const String KEEP_ALIVE_COMMAND = "keepAlive-";
         public const String MANAGE_IMAGE_COMMAND = "manageImage-";
         public const String FIRST_IMAGE_COMMAND = "firstImage-";
+        private const string ALARM = "yes-";
+        private const string NOALARM = "no-";
         String[] connectionInfo = { DEFAULT_DESTINATION_IP, DEFAULT_PORT };
 
         private DigitalInput pir_sensor = null;
@@ -76,11 +80,7 @@ namespace Client
 
             camera.PictureCaptured += camera_PictureCaptured;
             camera.BitmapStreamed += camera_BitmapStreamed;
-            
-
-           // camera.StartStreaming();
-
-           
+          
 
             WindowsManager.setupWindowSetupCamera();
             //timer_pir.Start();   
@@ -93,13 +93,14 @@ namespace Client
             
             if (camera.CameraReady)
             {
+                button.ButtonPressed += button_ButtonPressed;
                 camera.StartStreaming();
                 progress = WindowsManager.setupWindowProgress();
                 timer_progress = new GT.Timer(350);
                 timer_progress.Tick += progressIncrement;
                 timer_progress.Start();
             }
-            button.ButtonPressed += button_ButtonPressed;
+           
             
         }
 
@@ -149,7 +150,13 @@ namespace Client
 
             GT.Timer timer_keepAlive = new GT.Timer(10000);
             timer_keepAlive.Tick += keepAlive;
-            //timer_keepAlive.Start();
+            timer_keepAlive.Start();
+
+            setupComplete = true;
+            Thread.Sleep(500);
+            camera.TakePicture();
+
+          
         }
 
       
@@ -175,10 +182,11 @@ namespace Client
            
         }
 
+        GT.Timer timer_getimage;
         private void setupCameraTakePicture()
         {
             
-           GT.Timer timer_getimage = new GT.Timer(2000);
+           timer_getimage = new GT.Timer(2000);
            timer_getimage.Tick += takePicture;
            timer_getimage.Start();  
          
@@ -302,25 +310,27 @@ namespace Client
             buzzer_sensor = extender.CreatePwmOutput(Gadgeteer.Socket.Pin.Nine);
             movimento_orizzontale = extender.CreatePwmOutput(Gadgeteer.Socket.Pin.Seven);
             movimento_verticale = extender.CreatePwmOutput(Gadgeteer.Socket.Pin.Eight);
+
             current_orizzontal_pos = 0.075;
             current_vertical_pos = 0.075;
             movimento_orizzontale.Set(50, current_orizzontal_pos);
-            Thread.Sleep(1000);
+            Thread.Sleep(2000);
             movimento_verticale.Set(50, current_vertical_pos);
+             
         }
 
         private void ScattaAllarme()
-        {       
-            while (true)
-            {
-                for (int i = 0; i < 10; i++)
-                {
-                    buzzer_sensor.Set(500, 0.5);
-                    Thread.Sleep(1000);
-                    buzzer_sensor.Set(1000, 0.5);
-                    Thread.Sleep(1000);
-                }                    
-            }            
+        {
+            GT.Timer allarm = new GT.Timer(100);
+            allarm.Tick += allarm_Tick;                                    
+        }
+
+        void allarm_Tick(GT.Timer timer)
+        {
+            buzzer_sensor.Set(500, 0.5);
+            Thread.Sleep(1000);
+            buzzer_sensor.Set(1000, 0.5);
+            Thread.Sleep(1000);
         }
 
         private void SpegniAllarme()
@@ -350,12 +360,11 @@ namespace Client
 
             if (NetworkUp)
             {
-                /*
-                setupComplete = true;
-                Thread.Sleep(500);
-                camera.TakePicture();
-                 */
-                WindowsManager.setupWindowInsertPin();
+                
+              
+               
+               // WindowsManager.setupWindowInsertPin();
+                initServer();
             }
             else
             {
@@ -381,9 +390,10 @@ namespace Client
                 progress.Value = 100;
                 progress.Invalidate();
                 invalidate = false;
+                setupJoystick();
             }
            
-            setupJoystick();
+            
             displayT35.SimpleGraphics.DisplayImage(e, 0, 0);    
         }
 
@@ -535,6 +545,12 @@ namespace Client
 
                 String response = reciveResponse(clientSocket);
                 Debug.Print(response);
+
+                if (response.Equals(ALARM))
+                {
+
+                    ScattaAllarme();
+                }
 
                 clientSocket.Close();
                 

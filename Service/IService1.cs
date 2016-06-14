@@ -19,6 +19,9 @@ namespace FinalService
         [OperationContract]
         Boolean keepAlive(string myMacAddress, long mycurrentTime, int port);
 
+        [OperationContract]
+        UserInfo isRegistered(String mac);
+
         // TODO: aggiungere qui le operazioni del servizio
     }
 

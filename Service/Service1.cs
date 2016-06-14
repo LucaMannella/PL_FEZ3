@@ -1,4 +1,5 @@
-﻿using Service;
+﻿using Server;
+using Service;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,7 @@ namespace FinalService
     public class Service1 : IService1
     {
         private static readonly DateTime Jan1st1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-
+        private Database mDatabase;
         private const string GETPORT = "getPort\0";
         private const string KEEPALIVE = "keep-";
         private const string OK = "200OK";
@@ -86,6 +87,14 @@ namespace FinalService
                 return false;
             }
 
+        }
+
+        public UserInfo isRegistered(String mac)
+        {
+
+
+
+            return null;
         }
 
         public static void Send(Socket socket, byte[] buffer, int offset, int size, int timeout)

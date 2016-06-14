@@ -31,7 +31,7 @@ namespace Server
         private Bitmap backgroundFrame;
         private BitmapData bitmapData;
         private int counter = 0;
-
+        private int cont = 0;
         private Bitmap[] numbersBitmaps = new Bitmap[9];
 
         private bool calculateMotionLevel = false;
@@ -157,6 +157,10 @@ namespace Server
                             pixelsChanged += rc.Width * rc.Height;
                     }
                 }
+                String picturePath = Constants.IMAGE_DIRECTORY +"rect"+ cont + ".jpg";
+                cont++;
+                Bitmap bitMap = Bitmap.FromHbitmap(g.GetHdc());
+                bitMap.Save(picturePath, System.Drawing.Imaging.ImageFormat.Jpeg);
                 g.Dispose();
             }
         }
