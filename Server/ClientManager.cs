@@ -55,6 +55,8 @@ namespace Server
             IPEndPoint localEndPoint = new IPEndPoint(ip, porta);
             Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
+            mDatabase.OpenConnect();
+
             try {
                 Thread keepalive = new Thread(() => checkKeepAlive());
                 keepalive.Start();
@@ -66,6 +68,7 @@ namespace Server
                 Console.WriteLine("Unexpected Error");
                 Console.WriteLine("Source : " + e.Source);
                 Console.WriteLine("Message : " + e.Message);
+                mDatabase.CloseConnect();
                 return;
             }
 
@@ -125,6 +128,9 @@ namespace Server
                     Console.WriteLine("Source : " + e.Source);
                     Console.WriteLine("Message : " + e.Message);
                 }
+                finally {
+                    mDatabase.CloseConnect();
+                }
             }
 
         }
@@ -145,10 +151,14 @@ namespace Server
                 if(lastTime != 0) {
                     if (CurrentTimeMillis() - lastTime > 20000)
                     {
+                        String mac = myMac.Remove(myMac.Length-1);
                         String subject = "Warning client disconnected";
-                        String message = "The client: " + myMac.Remove(myMac.Length - 1) + " is shut down at: " + DateTime.Now.ToLongTimeString() +" of: " + DateTime.Now.ToLongDateString();
+                        String message = "The client: "+mac+" has shut down at: "
+                            + DateTime.Now.ToLongTimeString()+" of: "+DateTime.Now.ToLongDateString();
+
+                        mDatabase.removeClient(mac);  // removing the client from the database
                         sendMail(subject, message, null);
-                        break;
+                        check = false;
                     }
                 }
             }
@@ -162,9 +172,7 @@ namespace Server
             motionDetector.MotionLevelCalculation = true;
 
             if (lastFrame != null)
-            {
                 lastFrame.Dispose();
-            }
 
             lastFrame = (System.Drawing.Bitmap)current.Clone();
 
@@ -203,7 +211,7 @@ namespace Server
             int ricevuti = -1;
             long mancanti = lung - totRicevuti;
 
-            while ((mancanti = lung - totRicevuti) > 0)
+            while( (mancanti = lung - totRicevuti) > 0)
             {
                 if (mancanti >= lung)
                     ricevuti = s.Receive(buffer, (int)lung, SocketFlags.None);
