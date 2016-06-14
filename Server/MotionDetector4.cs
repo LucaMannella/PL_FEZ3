@@ -64,7 +64,7 @@ namespace Server
             for (int i = 1; i <= 9; i++)
             {
                 numbersBitmaps[i - 1] = new Bitmap(assembly.GetManifestResourceStream(
-                    string.Format("motion.Resources.{0}.gif", i)));
+                    string.Format("Server.Resources.{0}.gif", i)));
             }
         }
 
