@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Giu 14, 2016 alle 22:06
+-- Generation Time: Giu 14, 2016 alle 23:37
 -- Versione del server: 5.6.24
 -- PHP Version: 5.6.8
 
@@ -24,16 +24,30 @@ USE `pl_fez03`;
 
 --
 -- Struttura della tabella `clients`
+-- Creazione: Mag 29, 2016 alle 15:42
 --
 DROP TABLE IF EXISTS `clients`;
 CREATE TABLE IF NOT EXISTS `clients` (
-  `MAC` varchar(17) NOT NULL,
+  `MAC` char(17) NOT NULL,
   `Port` int(10) unsigned NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 -- --------------------------------------------------------
 
 --
+-- Struttura della tabella `customers`
+-- Creazione: Giu 14, 2016 alle 20:57
+--
+DROP TABLE IF EXISTS `customers`;
+CREATE TABLE IF NOT EXISTS `customers` (
+  `MAC` char(17) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `pin` char(8) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+-- --------------------------------------------------------
+
+--
 -- Struttura della tabella `suspicious_pictures`
+-- Creazione: Giu 10, 2016 alle 09:46
 --
 DROP TABLE IF EXISTS `suspicious_pictures`;
 CREATE TABLE IF NOT EXISTS `suspicious_pictures` (
@@ -45,6 +59,7 @@ CREATE TABLE IF NOT EXISTS `suspicious_pictures` (
 
 --
 -- Struttura della tabella `test`
+-- Creazione: Mag 20, 2016 alle 12:07
 --
 DROP TABLE IF EXISTS `test`;
 CREATE TABLE IF NOT EXISTS `test` (
@@ -66,6 +81,12 @@ INSERT INTO `test` (`ID`, `Name`) VALUES
 ALTER TABLE `clients`
   ADD PRIMARY KEY (`MAC`);
 
+--
+-- Indexes for table `customers`
+--
+ALTER TABLE `customers`
+  ADD PRIMARY KEY (`MAC`);
+  
   --
 -- Indexes for table `suspicious_pictures`
 --
