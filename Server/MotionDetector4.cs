@@ -159,8 +159,11 @@ namespace Server
                 }
                 String picturePath = Constants.IMAGE_DIRECTORY +"rect"+ cont + ".jpg";
                 cont++;
-                Bitmap bitMap = Bitmap.FromHbitmap(g.GetHdc());
-                bitMap.Save(picturePath, System.Drawing.Imaging.ImageFormat.Jpeg);
+                image.Save(picturePath);
+                /*
+                Bitmap myBitmap = new Bitmap(240, 320, g);
+                myBitmap.Save(picturePath, System.Drawing.Imaging.ImageFormat.Jpeg);
+                 * */
                 g.Dispose();
             }
         }
