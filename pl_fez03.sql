@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Giu 14, 2016 alle 23:37
+-- Generation Time: Giu 15, 2016 alle 15:52
 -- Versione del server: 5.6.24
 -- PHP Version: 5.6.8
 
@@ -41,7 +41,7 @@ DROP TABLE IF EXISTS `customers`;
 CREATE TABLE IF NOT EXISTS `customers` (
   `MAC` char(17) NOT NULL,
   `email` varchar(100) NOT NULL,
-  `pin` char(8) NOT NULL
+  `pin` varchar(64) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 -- --------------------------------------------------------
 
@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS `test` (
 INSERT INTO `test` (`ID`, `Name`) VALUES
 (1, 'Alfonso'),
 (2, 'Luca');
-
+-- --------------------------------------------------------
 
 --
 -- Indexes for table `clients`
@@ -86,8 +86,8 @@ ALTER TABLE `clients`
 --
 ALTER TABLE `customers`
   ADD PRIMARY KEY (`MAC`);
-  
-  --
+
+--
 -- Indexes for table `suspicious_pictures`
 --
 ALTER TABLE `suspicious_pictures`
@@ -98,6 +98,7 @@ ALTER TABLE `suspicious_pictures`
 --
 ALTER TABLE `test`
   ADD PRIMARY KEY (`ID`);
+-- --------------------------------------------------------
 
 --
 -- AUTO_INCREMENT for table `test`
