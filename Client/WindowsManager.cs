@@ -28,7 +28,7 @@ namespace Client
         private static GHI.Glide.UI.PasswordBox password;
         
 
-        public static void setupWindowInsertPin(){
+        public static void showWindowInsertPin(){
 
 
             Window window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.window_pin));
@@ -68,6 +68,8 @@ namespace Client
 
         static void btnOk_TapEvent(object sender)
         {
+            //Todo check pin with service
+            showWindowSetupCamera();
           
         }
 
@@ -194,7 +196,7 @@ namespace Client
             
         }
 
-        public static void setupWindowSetupCamera()
+        public static void showWindowSetupCamera()
         {
 
 
@@ -206,7 +208,7 @@ namespace Client
             Glide.MainWindow = window;
         }
 
-        public static GHI.Glide.UI.ProgressBar setupWindowProgress()
+        public static GHI.Glide.UI.ProgressBar showWindowProgress()
         {
 
 
@@ -221,7 +223,7 @@ namespace Client
             return progress;
         }
 
-        public static void setupWindowNetworkDown()
+        public static void showWindowNetworkDown()
         {
 
             Window window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.window_network_down));
@@ -230,6 +232,35 @@ namespace Client
             btnRetry.TapEvent += btnRetry_TapEvent;
             GlideTouch.Initialize();
             Glide.MainWindow = window;
+        }
+
+        public static void showWindowErrorPin()
+        {
+
+            Window window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.window_error_pin));
+            GHI.Glide.UI.Button btnRetryerrorpin = (GHI.Glide.UI.Button)window.GetChildByName("retry");
+
+            btnRetryerrorpin.TapEvent += btnRetryerrorpin_TapEvent;
+            GlideTouch.Initialize();
+            Glide.MainWindow = window;
+        }
+
+        public static void showWindowNotRegistered()
+        {
+
+            Window window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.window_not_regitered));
+            GHI.Glide.UI.Button btnBack = (GHI.Glide.UI.Button)window.GetChildByName("back");
+
+            btnBack.TapEvent += btnRetryerrorpin_TapEvent;
+            GlideTouch.Initialize();
+            Glide.MainWindow = window;
+        }
+
+       
+
+        static void btnRetryerrorpin_TapEvent(object sender)
+        {
+            showWindowInsertPin();
         }
 
         static void btnRetry_TapEvent(object sender)

@@ -38,8 +38,10 @@ namespace Client
         {
             window_pin = -23392,
             window_loading = -2759,
+            window_error_pin = 6527,
             window_network_down = 18276,
             window_setup_camera = 19777,
+            window_not_regitered = 20593,
         }
         [System.SerializableAttribute()]
         internal enum FontResources : short

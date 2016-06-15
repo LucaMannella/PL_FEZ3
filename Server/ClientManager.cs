@@ -149,7 +149,7 @@ namespace Server
 
             while (check) {
                 if(lastTime != 0) {
-                    if (CurrentTimeMillis() - lastTime > 20000)
+                    if (CurrentTimeMillis() - lastTime > 45000)
                     {
                         String mac = myMac.Remove(myMac.Length-1);
                         String subject = "Warning client disconnected";

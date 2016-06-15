@@ -124,6 +124,15 @@
   <data name="small" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\small.tinyfnt;System.Byte[], mscorlib, Culture=neutral, PublicKeyToken=null</value>
   </data>
+  <data name="window_error_pin" xml:space="preserve">
+    <value>&lt;Glide Version="1.0.7"&gt;
+  &lt;Window Name="instance115" Width="320" Height="240" BackColor="FFFFFF"&gt;
+    &lt;TextBox Name="instance353" X="0" Y="0" Width="320" Height="32" Alpha="255" Text="ERROR" TextAlign="center" Font="6" FontColor="000000"/&gt;
+    &lt;TextBlock Name="instance488" X="71" Y="63" Width="200" Height="32" Alpha="255" Text="The inserted pin is not correct " TextAlign="left" TextVerticalAlign="bottom" Font="5" FontColor="F00000" BackColor="000000" ShowBackColor="False"/&gt;
+    &lt;Button Name="retry" X="117" Y="111" Width="80" Height="32" Alpha="255" Text="RETRY" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+  &lt;/Window&gt;
+&lt;/Glide&gt;</value>
+  </data>
   <data name="window_loading" xml:space="preserve">
     <value>&lt;Glide Version="1.0.7"&gt;
   &lt;Window Name="instance115" Width="320" Height="240" BackColor="FFFFFF"&gt;
@@ -138,6 +147,16 @@
     &lt;TextBox Name="instance353" X="0" Y="0" Width="320" Height="32" Alpha="255" Text="NETWORK DOWN" TextAlign="center" Font="6" FontColor="000000"/&gt;
     &lt;TextBlock Name="instance1004" X="5" Y="40" Width="315" Height="50" Alpha="255" Text="Your Network is down, check your internet connection and  click retry" TextAlign="Left" TextVerticalAlign="Top" Font="4" FontColor="0" BackColor="000000" ShowBackColor="False"/&gt;
     &lt;Button Name="btn_retry" X="115" Y="100" Width="80" Height="32" Alpha="255" Text="Retry" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+  &lt;/Window&gt;
+&lt;/Glide&gt;</value>
+  </data>
+  <data name="window_not_regitered" xml:space="preserve">
+    <value>&lt;Glide Version="1.0.7"&gt;
+  &lt;Window Name="instance115" Width="320" Height="240" BackColor="FFFFFF"&gt;
+    &lt;TextBox Name="instance353" X="0" Y="0" Width="320" Height="32" Alpha="255" Text="WARNING" TextAlign="center" Font="6" FontColor="000000"/&gt;
+    &lt;TextBlock Name="instance488" X="71" Y="63" Width="200" Height="32" Alpha="255" Text="This client is not registered yet." TextAlign="left" TextVerticalAlign="bottom" Font="5" FontColor="F00000" BackColor="000000" ShowBackColor="False"/&gt;
+    &lt;Button Name="back" X="120" Y="131" Width="80" Height="32" Alpha="255" Text="BACK" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;TextBlock Name="instance32698" X="85" Y="90" Width="150" Height="32" Alpha="255" Text="Visit our website to register it" TextAlign="Left" TextVerticalAlign="Top" Font="4" FontColor="F00000" BackColor="000000" ShowBackColor="False"/&gt;
   &lt;/Window&gt;
 &lt;/Glide&gt;</value>
   </data>

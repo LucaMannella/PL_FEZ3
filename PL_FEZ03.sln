@@ -15,6 +15,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server", "Server\Server.csproj", "{1221ABF3-D7E2-43AB-B5EA-BA52741D949D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "Client\Client.csproj", "{268277CF-3D4A-4930-881E-5F43D977AD4F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{35D51CB9-DD6C-4C60-A467-DAD919B6CC15} = {35D51CB9-DD6C-4C60-A467-DAD919B6CC15}
+		{1221ABF3-D7E2-43AB-B5EA-BA52741D949D} = {1221ABF3-D7E2-43AB-B5EA-BA52741D949D}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
