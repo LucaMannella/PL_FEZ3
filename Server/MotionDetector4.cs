@@ -157,6 +157,7 @@ namespace Server
                             pixelsChanged += rc.Width * rc.Height;
                     }
                 }
+                //TODO salvare questa sul db non l'altra
                 String picturePath = Constants.IMAGE_DIRECTORY +"rect"+ cont + ".jpg";
                 cont++;
                 image.Save(picturePath);

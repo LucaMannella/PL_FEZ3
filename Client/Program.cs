@@ -66,7 +66,6 @@ namespace Client
             InitSensors();
             
             SetupEthernet();
-
             ethernetJ11D.NetworkUp += OnNetworkUp;
             ethernetJ11D.NetworkDown += OnNetworkDown;
 
@@ -114,7 +113,6 @@ namespace Client
                 setupJoystick();
             }
 
-
             displayT35.SimpleGraphics.DisplayImage(e, 0, 0);
         }
 
@@ -145,6 +143,7 @@ namespace Client
          * and get the port of the server socket to connect
          * 
         */
+        private GT.Timer timer_keepAlive;
         private void initServer()
         {
             bindProxyService();
@@ -160,7 +159,7 @@ namespace Client
             }
             serverEndPoint = new IPEndPoint(ipAddress, port);
 
-            GT.Timer timer_keepAlive = new GT.Timer(35000);
+            timer_keepAlive = new GT.Timer(35000);
             timer_keepAlive.Tick += keepAlive;
             timer_keepAlive.Start();
 
@@ -191,18 +190,28 @@ namespace Client
        */
         private void getAddressAndPort()
         {
-            //TODO gestire eccezione
-            var data = proxy.getServerAddressWithPort(new getServerAddressWithPort()
+            
+            try
             {
-                myMacAddress = myMac,
+                var data = proxy.getServerAddressWithPort(new getServerAddressWithPort()
+                {
+                    myMacAddress = myMac,
 
-            });
-            connectionInfo[0] = data.getServerAddressWithPortResult.address;
-            connectionInfo[1] = data.getServerAddressWithPortResult.port;
-            Debug.Print("Server address: " + data.getServerAddressWithPortResult.address);
-            Debug.Print("Server port: " + data.getServerAddressWithPortResult.port);
-            servertime = data.getServerAddressWithPortResult.serverTime;
-            Debug.Print("Server time: " + servertime);
+                });
+
+                connectionInfo[0] = data.getServerAddressWithPortResult.address;
+                connectionInfo[1] = data.getServerAddressWithPortResult.port;
+                Debug.Print("Server address: " + data.getServerAddressWithPortResult.address);
+                Debug.Print("Server port: " + data.getServerAddressWithPortResult.port);
+                servertime = data.getServerAddressWithPortResult.serverTime;
+                Debug.Print("Server time: " + servertime);
+
+            }
+            catch (SocketException e)
+            {
+                WindowsManager.showWindowErrorService();
+            }
+           
         }
 
         /*
@@ -212,15 +221,20 @@ namespace Client
         {
             Debug.Print("Keep Alive !");
             servertime += 35000;
-            //TODO gestire eccezione
-            var data = proxy.keepAlive(new keepAlive()
+            try
             {
-                myMacAddress = myMac,
-                mycurrentTime = servertime,
-                port = int.Parse(connectionInfo[1]),
-            });
+                var data = proxy.keepAlive(new keepAlive()
+                {
+                    myMacAddress = myMac,
+                    mycurrentTime = servertime,
+                    port = int.Parse(connectionInfo[1]),
+                });
+            }
+            catch (SocketException e)
+            {
 
-            Debug.Print("keepAlive return: " + data.keepAliveResult.ToString());
+                WindowsManager.showWindowErrorService();
+            }   
         }
 
         /**
@@ -228,41 +242,51 @@ namespace Client
          */
         private void camera_PictureCaptured(GTM.GHIElectronics.Camera sender, GT.Picture picture)
         {
-            if (throw_allarm)
+            if (throw_allarm || picture==null)
                 return;
 
             Int32 HeurSum = 0;
             Bitmap bitmapB = picture.MakeBitmap();
 
             Debug.Print("Image captured! ");
-
-            if (bitmapA == null)    //per gestire la prima volta
+            try
             {
-                bitmapA = bitmapB;
-                RGlobal = heuristicSum(bitmapA);
-                PreviousAverage = RGlobal / 9;
-                sendPicture(picture.PictureData, true);
-                setupCameraTakePicture();
-                return;
+                if (bitmapA == null)    //per gestire la prima volta
+                {
+                    bitmapA = bitmapB;
+                    RGlobal = heuristicSum(bitmapA);
+                    PreviousAverage = RGlobal / 9;
+                    sendPicture(picture.PictureData, true);
+                    setupCameraTakePicture();
+                    return;
+                }
+
+                Debug.Print(DateTime.Now.ToString());
+                HeurSum = heuristicSum(bitmapB);
+                Debug.Print(DateTime.Now.ToString());
+
+                Debug.Print(PreviousAverage.ToString());
+                Int32 average = (HeurSum / 9);
+                Debug.Print(average.ToString());
+
+                if (System.Math.Abs(PreviousAverage - average) > 45)    //SOGLIA LIMITE 40/50
+                {
+                    Debug.Print("Suspicious picture!");
+                    sendPicture(picture.PictureData, false);
+                }
+
+                RGlobal = HeurSum;
+                PreviousAverage = average;
+
+                displayT35.SimpleGraphics.DisplayImage(picture, 0, 0); //TODO eliminare alla fine
             }
-
-            Debug.Print(DateTime.Now.ToString());
-            HeurSum = heuristicSum(bitmapB);
-            Debug.Print(DateTime.Now.ToString());
-
-            Debug.Print(PreviousAverage.ToString());
-            Int32 average = (HeurSum / 9);
-            Debug.Print(average.ToString());
-
-            if (System.Math.Abs(PreviousAverage - average) > 45)    //SOGLIA LIMITE 40/50
+            catch (SocketException e)
             {
-                Debug.Print("Suspicious picture!");
-                sendPicture(picture.PictureData, false);
+                timer_getimage.Stop();
+                timer_keepAlive.Stop();
+                WindowsManager.showWindowErrorServer();
             }
-
-            RGlobal = HeurSum;
-            PreviousAverage = average;
-            displayT35.SimpleGraphics.DisplayImage(picture, 0, 0); //TODO eliminare alla fine
+          
         }
 
         /*
@@ -271,11 +295,9 @@ namespace Client
         GT.Timer timer_getimage;
         private void setupCameraTakePicture()
         {
-
             timer_getimage = new GT.Timer(CAMERA_INTERVAL);
             timer_getimage.Tick += takePicture;
             timer_getimage.Start();
-
         }
 
         /*
@@ -438,8 +460,6 @@ namespace Client
             NetworkUp = true;
             multicolorLED.TurnGreen();
             ListNetworkInterfaces();
-
-           
         }
  
         /**
@@ -454,7 +474,7 @@ namespace Client
           
             if (setupComplete)
             {
-                StopMe = true;  
+                timer_keepAlive.Stop();
                 ThrowAllarm();
             }
                 
@@ -536,7 +556,6 @@ namespace Client
             buzzer_sensor = extender.CreatePwmOutput(Gadgeteer.Socket.Pin.Nine);
             movimento_orizzontale = extender.CreatePwmOutput(Gadgeteer.Socket.Pin.Seven);
             movimento_verticale = extender.CreatePwmOutput(Gadgeteer.Socket.Pin.Eight);
-
             current_orizzontal_pos = 0.075;
             current_vertical_pos = 0.075;
             movimento_orizzontale.Set(50, current_orizzontal_pos);

@@ -256,6 +256,21 @@ namespace Client
             Glide.MainWindow = window;
         }
 
+        public static void showWindowErrorService()
+        {
+
+            Window window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.window_error_service));
+ 
+            Glide.MainWindow = window;
+        }
+
+        public static void showWindowErrorServer()
+        {
+
+            Window window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.window_error_server));
+
+            Glide.MainWindow = window;
+        }
        
 
         static void btnRetryerrorpin_TapEvent(object sender)
@@ -265,7 +280,7 @@ namespace Client
 
         static void btnRetry_TapEvent(object sender)
         {
-            mProgram.startCapture();
+
         }
 
         static void btnNext_TapEvent(object sender)
