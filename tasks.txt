@@ -34,8 +34,9 @@ SERVER SIDE
 	2.5) Inviare e-mail all'utente							(fatto)
 
 3) Gestione eccezioni										<--- da fare
-da aggiungere:
-1) web application
+
+ --- da aggiungere: ---
+1) web application											<--- in progress
 2) android application
 
 
