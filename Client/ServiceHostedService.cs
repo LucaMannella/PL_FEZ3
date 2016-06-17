@@ -38,12 +38,13 @@ namespace tempuri.org
 
             // Set base service properties
             ServiceNamespace = new WsXmlNamespace("ise", "http://tempuri.org/");
-            ServiceID = "urn:uuid:fb465e1b-c234-4c7a-a20c-8e7b97d4f687";
+            ServiceID = "urn:uuid:de11e1c5-ae48-44b6-8a83-11cad4ccd89f";
             ServiceTypeName = "IService1";
 
             // Add service types here
             ServiceOperations.Add(new WsServiceOperation("http://tempuri.org/IService1", "getServerAddressWithPort"));
             ServiceOperations.Add(new WsServiceOperation("http://tempuri.org/IService1", "keepAlive"));
+            ServiceOperations.Add(new WsServiceOperation("http://tempuri.org/IService1", "isValid"));
 
             // Add event sources here
         }
@@ -101,6 +102,32 @@ namespace tempuri.org
             // Create response serializer
             keepAliveResponseDataContractSerializer respDcs;
             respDcs = new keepAliveResponseDataContractSerializer("keepAliveResponse", "http://tempuri.org/");
+            response.Serializer = respDcs;
+            return response;
+        }
+        
+        public virtual WsMessage isValid(WsMessage request)
+        {
+            // Build request object
+            isValidDataContractSerializer reqDcs;
+            reqDcs = new isValidDataContractSerializer("isValid", "http://tempuri.org/");
+            isValid req;
+            req = ((isValid)(reqDcs.ReadObject(request.Reader)));
+            request.Reader.Dispose();
+            request.Reader = null;
+
+            // Create response object
+            // Call service operation to process request and return response.
+            isValidResponse resp;
+            resp = m_service.isValid(req);
+
+            // Create response header
+            WsWsaHeader respHeader = new WsWsaHeader("http://tempuri.org/IService1/isValidResponse", request.Header.MessageID, m_version.AnonymousUri, null, null, null);
+            WsMessage response = new WsMessage(respHeader, resp, WsPrefix.Wsdp);
+
+            // Create response serializer
+            isValidResponseDataContractSerializer respDcs;
+            respDcs = new isValidResponseDataContractSerializer("isValidResponse", "http://tempuri.org/");
             response.Serializer = respDcs;
             return response;
         }

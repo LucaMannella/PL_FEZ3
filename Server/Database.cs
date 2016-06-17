@@ -9,7 +9,7 @@ using System.Threading;
 
 namespace Server
 {
-    class Database
+    public class Database
     {
         MySqlConnection myConn = null;
         bool connection_Opened = false;

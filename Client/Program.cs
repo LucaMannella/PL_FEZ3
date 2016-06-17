@@ -17,6 +17,7 @@ using System.Text;
 using Gadgeteer.Modules.GHIElectronics;
 using Ws.Services.Binding;
 using Ws.Services;
+using System.Security.Cryptography;
 
 using Gadgeteer.SocketInterfaces;
 
@@ -503,6 +504,22 @@ namespace Client
             return new string(Encoding.UTF8.GetChars(buf));
         }
 
+
+        public Boolean checkLogin(String pin)
+        {
+            HashAlgorithm hashSHA256 = new HashAlgorithm(HashAlgorithmType.SHA256);
+            Byte[] dataToHmac = System.Text.Encoding.UTF8.GetBytes(pin+"lms_fez03");
+            String signature = Convert.ToBase64String(hashSHA256.ComputeHash(dataToHmac));
+            var data = proxy.isValid(new isValid()
+            {
+                mac = myMac,
+                pin = signature
+              
+            });
+
+            return data.isValidResult;
+
+        }
 // ----------------------- End Network & Connections ----------------------- //
 
         private void joystick_function(GT.Timer timer)

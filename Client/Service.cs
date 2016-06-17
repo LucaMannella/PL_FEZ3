@@ -268,6 +268,130 @@ namespace tempuri.org
         }
     }
     
+    [DataContract(Namespace="http://tempuri.org/")]
+    public class isValid
+    {
+        
+        [DataMember(Order=0, IsNillable=true, IsRequired=false)]
+        public string mac;
+        
+        [DataMember(Order=1, IsNillable=true, IsRequired=false)]
+        public string pin;
+    }
+    
+    public class isValidDataContractSerializer : DataContractSerializer
+    {
+        
+        public isValidDataContractSerializer(string rootName, string rootNameSpace) : 
+                base(rootName, rootNameSpace)
+        {
+        }
+        
+        public isValidDataContractSerializer(string rootName, string rootNameSpace, string localNameSpace) : 
+                base(rootName, rootNameSpace, localNameSpace)
+        {
+        }
+        
+        public override object ReadObject(XmlReader reader)
+        {
+            isValid isValidField = null;
+            if (IsParentStartElement(reader, false, true))
+            {
+                isValidField = new isValid();
+                reader.Read();
+                if (IsChildStartElement(reader, "mac", true, false))
+                {
+                    reader.Read();
+                    isValidField.mac = reader.ReadString();
+                    reader.ReadEndElement();
+                }
+                if (IsChildStartElement(reader, "pin", true, false))
+                {
+                    reader.Read();
+                    isValidField.pin = reader.ReadString();
+                    reader.ReadEndElement();
+                }
+                reader.ReadEndElement();
+            }
+            return isValidField;
+        }
+        
+        public override void WriteObject(XmlWriter writer, object graph)
+        {
+            isValid isValidField = ((isValid)(graph));
+            if (WriteParentElement(writer, true, true, graph))
+            {
+                if (WriteChildElement(writer, "mac", true, false, isValidField.mac))
+                {
+                    writer.WriteString(isValidField.mac);
+                    writer.WriteEndElement();
+                }
+                if (WriteChildElement(writer, "pin", true, false, isValidField.pin))
+                {
+                    writer.WriteString(isValidField.pin);
+                    writer.WriteEndElement();
+                }
+                writer.WriteEndElement();
+            }
+            return;
+        }
+    }
+    
+    [DataContract(Namespace="http://tempuri.org/")]
+    public class isValidResponse
+    {
+        
+        [DataMember(Order=0, IsRequired=false)]
+        public bool isValidResult;
+    }
+    
+    public class isValidResponseDataContractSerializer : DataContractSerializer
+    {
+        
+        public isValidResponseDataContractSerializer(string rootName, string rootNameSpace) : 
+                base(rootName, rootNameSpace)
+        {
+        }
+        
+        public isValidResponseDataContractSerializer(string rootName, string rootNameSpace, string localNameSpace) : 
+                base(rootName, rootNameSpace, localNameSpace)
+        {
+        }
+        
+        public override object ReadObject(XmlReader reader)
+        {
+            isValidResponse isValidResponseField = null;
+            if (IsParentStartElement(reader, false, true))
+            {
+                isValidResponseField = new isValidResponse();
+                reader.Read();
+                if (IsChildStartElement(reader, "isValidResult", false, false))
+                {
+                    reader.Read();
+                    isValidResponseField.isValidResult = XmlConvert.ToBoolean(reader.ReadString());
+                    reader.ReadEndElement();
+                }
+                reader.ReadEndElement();
+            }
+            return isValidResponseField;
+        }
+        
+        public override void WriteObject(XmlWriter writer, object graph)
+        {
+            isValidResponse isValidResponseField = ((isValidResponse)(graph));
+            if (WriteParentElement(writer, true, true, graph))
+            {
+                if (WriteChildElement(writer, "isValidResult", false, false, isValidResponseField.isValidResult))
+                {
+                    writer.WriteString(XmlConvert.ToString(isValidResponseField.isValidResult));
+                    writer.WriteEndElement();
+                }
+                writer.WriteEndElement();
+            }
+            return;
+        }
+    }
+    
     [ServiceContract(Namespace="http://tempuri.org/")]
     [PolicyAssertion(Namespace="http://schemas.xmlsoap.org/ws/2004/09/policy", Name="All", PolicyID="WSHttpBinding_IService1_policy")]
     public interface IIService1
@@ -278,6 +402,9 @@ namespace tempuri.org
         
         [OperationContract(Action="http://tempuri.org/IService1/keepAlive")]
         keepAliveResponse keepAlive(keepAlive req);
+        
+        [OperationContract(Action="http://tempuri.org/IService1/isValid")]
+        isValidResponse isValid(isValid req);
     }
 }
 namespace schemas.datacontract.org.Service

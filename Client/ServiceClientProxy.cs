@@ -102,5 +102,37 @@ namespace tempuri.org
             response.Reader = null;
             return resp;
         }
+        
+        public virtual isValidResponse isValid(isValid req)
+        {
+
+            // Create request header
+            String action;
+            action = "http://tempuri.org/IService1/isValid";
+            WsWsaHeader header;
+            header = new WsWsaHeader(action, null, EndpointAddress, m_version.AnonymousUri, null, null);
+            WsMessage request = new WsMessage(header, req, WsPrefix.None);
+
+            // Create request serializer
+            isValidDataContractSerializer reqDcs;
+            reqDcs = new isValidDataContractSerializer("isValid", "http://tempuri.org/");
+            request.Serializer = reqDcs;
+            request.Method = "isValid";
+
+
+            // Send service request
+            m_requestChannel.Open();
+            WsMessage response = m_requestChannel.Request(request);
+            m_requestChannel.Close();
+
+            // Process response
+            isValidResponseDataContractSerializer respDcs;
+            respDcs = new isValidResponseDataContractSerializer("isValidResponse", "http://tempuri.org/");
+            isValidResponse resp;
+            resp = ((isValidResponse)(respDcs.ReadObject(response.Reader)));
+            response.Reader.Dispose();
+            response.Reader = null;
+            return resp;
+        }
     }
 }

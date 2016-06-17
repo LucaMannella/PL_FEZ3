@@ -69,9 +69,29 @@ namespace Client
         static void btnOk_TapEvent(object sender)
         {
             //Todo check pin with service
-            showWindowSetupCamera();
+            Boolean ret = false;
+            String pass = password.Text;
+            if (pass.Length == 8)
+            {
+               ret = mProgram.checkLogin(pass);
+            }
+            else
+            {
+                //visualizzare pin corto
+            }
+            if (ret)
+            {
+                showWindowSetupCamera();
+            }
+            else
+            {
+                //visualizzare pin errato
+            }
+                
           
         }
+
+    
 
         static void btnDel_TapEvent(object sender)
         {

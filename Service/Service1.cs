@@ -89,12 +89,11 @@ namespace FinalService
 
         }
 
-        public UserInfo isRegistered(String mac)
+        public Boolean isValid(String mac, String pin)
         {
-
-
-
-            return null;
+            mDatabase = Database.getInstance();
+            Boolean bRet = mDatabase.isValidClient(mac, pin);
+            return bRet;
         }
 
         public static void Send(Socket socket, byte[] buffer, int offset, int size, int timeout)
