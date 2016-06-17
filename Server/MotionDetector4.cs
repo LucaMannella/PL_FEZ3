@@ -13,6 +13,7 @@ namespace Server
 
     using AForge.Imaging;
     using AForge.Imaging.Filters;
+    using System.Text.RegularExpressions;
 
     /// <summary>
     /// MotionDetector4
@@ -24,7 +25,7 @@ namespace Server
         private Difference differenceFilter = new Difference();
         private Threshold thresholdFilter = new Threshold(15);
         private MoveTowards moveTowardsFilter = new MoveTowards();
-
+        private static readonly DateTime Jan1st1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         private FiltersSequence processingFilter1 = new FiltersSequence();
         private BlobCounter blobCounter = new BlobCounter();
 
@@ -33,11 +34,12 @@ namespace Server
         private int counter = 0;
         private int cont = 0;
         private Bitmap[] numbersBitmaps = new Bitmap[9];
-
+        private Database mDatabase;
         private bool calculateMotionLevel = false;
         private int width;	// image width
         private int height;	// image height
         private int pixelsChanged;
+        private String mac;
 
         // Motion level calculation - calculate or not motion level
         public bool MotionLevelCalculation
@@ -53,11 +55,12 @@ namespace Server
         }
 
         // Constructor
-        public MotionDetector4()
+        public MotionDetector4(String mac)
         {
             processingFilter1.Add(grayscaleFilter);
             processingFilter1.Add(pixellateFilter);
-
+            this.mac = mac;
+            mDatabase = Database.getInstance();
             // load numbers bitmaps
             Assembly assembly = this.GetType().Assembly;
 
@@ -77,6 +80,11 @@ namespace Server
                 backgroundFrame = null;
             }
             counter = 0;
+        }
+
+        public static long CurrentTimeMillis()
+        {
+            return (long)(DateTime.UtcNow - Jan1st1970).TotalMilliseconds;
         }
 
         // Process new frame
@@ -157,14 +165,15 @@ namespace Server
                             pixelsChanged += rc.Width * rc.Height;
                     }
                 }
-                //TODO salvare questa sul db non l'altra
-                String picturePath = Constants.IMAGE_DIRECTORY +"rect"+ cont + ".jpg";
+                String strValue = mac;
+                strValue = Regex.Replace(strValue, @"-", "");
+                strValue = strValue.Remove(strValue.Length - 1);
+                String picturePath = Constants.SERVER_DIRECTORY + Constants.IMAGE_RELATIVE_PATH + strValue + "\\" + "rect" + cont + ".jpg";
                 cont++;
                 image.Save(picturePath);
-                /*
-                Bitmap myBitmap = new Bitmap(240, 320, g);
-                myBitmap.Save(picturePath, System.Drawing.Imaging.ImageFormat.Jpeg);
-                 * */
+                Boolean ok = mDatabase.insertSuspiciousPicturePath(mac, CurrentTimeMillis(), @"\" + picturePath);
+                if (!ok)
+                    Console.WriteLine("Error: Impossible to store picture: " + picturePath + " on the database!\n");
                 g.Dispose();
             }
         }

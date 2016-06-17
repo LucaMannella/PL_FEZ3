@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Mail;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -43,7 +44,7 @@ namespace Server
         {
             this.myMac = mac;
             this.porta = porta;
-            this.motionDetector = new MotionDetector4();
+            this.motionDetector = new MotionDetector4(mac);
             this.mDatabase = Database.getInstance();
         }
 
@@ -54,7 +55,7 @@ namespace Server
             IPAddress ip = IPAddress.Parse(Constants.SERVER_IP_ADDR);
             IPEndPoint localEndPoint = new IPEndPoint(ip, porta);
             Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
+            Boolean ok;
             mDatabase.OpenConnect();
 
             try {
@@ -104,6 +105,25 @@ namespace Server
                         case "firstImage\0":
                             Console.WriteLine("Received first image from: " + myMac);
                             System.Drawing.Bitmap current1 = receiveFile(lungImage, clientsock.s);
+                            String strValue = myMac;
+                            strValue = Regex.Replace(strValue, @"-", "");
+                            strValue = strValue.Remove(strValue.Length - 1);
+
+                            String picturePath = Constants.SERVER_DIRECTORY + Constants.IMAGE_RELATIVE_PATH + strValue + "\\" + "referenceimage" + ".jpg";
+                            bool exists = System.IO.Directory.Exists(Constants.SERVER_DIRECTORY + Constants.IMAGE_RELATIVE_PATH + "\\" + strValue);
+                            if(!exists)
+                                System.IO.Directory.CreateDirectory(Constants.SERVER_DIRECTORY + Constants.IMAGE_RELATIVE_PATH + "\\" + strValue);
+                            try
+                            {
+                                current1.Save(picturePath);
+                                ok = mDatabase.insertSuspiciousPicturePath(myMac, CurrentTimeMillis(), @"\" + picturePath);
+                                if (!ok)
+                                    Console.WriteLine("Error: Impossible to store picture: " + picturePath + " on the database!\n");
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine("Error! Impossible to store the received picture! Exception: " + ex.ToString() + "\n");
+                            }
                             Thread thread = new Thread(() => processImage(current1, clientsock));
                             thread.Start();
                             break;
@@ -204,7 +224,7 @@ namespace Server
 
         public Bitmap receiveFile(long lung, Socket s)
         {
-            Boolean ok;
+            
             byte[] buffer = new byte[lung];
 
             long totRicevuti = 0;
@@ -222,20 +242,10 @@ namespace Server
 
             var imageConverter = new ImageConverter();
             var image = (Image)imageConverter.ConvertFrom(buffer);
-            String picturePath = Constants.IMAGE_DIRECTORY + cont + ".jpg";
-            cont++;
+          
 
             Bitmap a = new Bitmap(image);
-            try {
-                a.Save(picturePath);
-                ok = mDatabase.insertSuspiciousPicturePath(myMac, CurrentTimeMillis(), picturePath);
-                if (!ok)
-                    Console.WriteLine("Error: Impossible to store picture: " + picturePath + " on the database!\n");
-            }
-            catch (Exception ex) {
-                Console.WriteLine("Error! Impossible to store the received picture! Exception: "+ex.ToString()+"\n");
-            }
-            
+           
             return a;
         }
 
@@ -275,8 +285,17 @@ namespace Server
             smtpclient.DeliveryMethod = SmtpDeliveryMethod.Network;
             smtpclient.UseDefaultCredentials = false;
             smtpclient.Credentials = new NetworkCredential(fromAddress.Address, fromPassword);
-
-            MailMessage mymailmex = new MailMessage(fromAddress, toAddress);
+            MailMessage mymailmex = null;
+            try
+            {
+                mymailmex = new MailMessage(fromAddress, toAddress);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error: Impossible to send the mail: " + e.Message + "\n");
+                return;
+            }
+           
             mymailmex.Subject = subject;
             mymailmex.Body = message;
 

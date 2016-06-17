@@ -81,8 +81,7 @@ namespace Client
 
         /**
          * This method is called when start the camera setup with joystick
-         * 
-        */
+         */
         private GHI.Glide.UI.ProgressBar progress;
         private GT.Timer timer_progress;
         public void setupCamera()
@@ -99,8 +98,8 @@ namespace Client
         }
 
         /**
-        * This method is called when a new streamed image is captured
-        */
+         * This method is called when a new streamed image is captured
+         */
         private Boolean invalidate = true;
         private void camera_BitmapStreamed(GTM.GHIElectronics.Camera sender, Bitmap e)
         {
@@ -117,8 +116,8 @@ namespace Client
         }
 
         /**
-        * This method is triggered when the button is pressed.
-        */
+         * This method is triggered when the button is pressed.
+         */
         private void button_ButtonPressed(GTM.GHIElectronics.Button sender, GTM.GHIElectronics.Button.ButtonState state)
         {
             Debug.Print("Button pressed!");
@@ -138,11 +137,10 @@ namespace Client
 
         }
 
-        /*
+        /**
          * This method initialize the connection with the server
          * and get the port of the server socket to connect
-         * 
-        */
+         */
         private GT.Timer timer_keepAlive;
         private void initServer()
         {
@@ -168,10 +166,9 @@ namespace Client
             camera.TakePicture();
         }
 
-        /*
-        * This method binding the service
-        * 
-       */
+        /**
+         * This method binding the service
+         */
         private void bindProxyService()
         {
             Debug.Print("Binding proxy service...");
@@ -183,14 +180,11 @@ namespace Client
             Debug.Print("Binding proxy service COMPLETE");
         }
 
-        /*
-        * 
-        * This method get the port of the server socket to connect from the service
-        * 
-       */
+        /**
+         * This method get the port of the server socket to connect from the service
+         */
         private void getAddressAndPort()
         {
-            
             try
             {
                 var data = proxy.getServerAddressWithPort(new getServerAddressWithPort()
@@ -214,7 +208,7 @@ namespace Client
            
         }
 
-        /*
+        /**
          * This method send periodic keep alive to server
          */
         private void keepAlive(GT.Timer timer)
@@ -289,7 +283,7 @@ namespace Client
           
         }
 
-        /*
+        /**
          * This method get periodic image from the camera
          */
         GT.Timer timer_getimage;
@@ -300,16 +294,20 @@ namespace Client
             timer_getimage.Start();
         }
 
-        /*
-        * This method get picture
-        */
+        /**
+         * This method get picture
+         */
         private void takePicture(GT.Timer timer)
         {
             if (camera.CameraReady)
                 camera.TakePicture();
+            else
+            {
+                Debug.Print("The camera is not ready yet");
+            }
         }
 
-        /*
+        /**
          * This method send the suspicious image to the server
          */
         private void sendPicture(byte[] e, Boolean first)
@@ -346,9 +344,9 @@ namespace Client
         }
 
         /**
-        * This method sum the value of green of 9 squares
-        * of dimension 8x8 taken from a bitmap.
-        */
+         * This method sum the value of green of 9 squares
+         * of dimension 8x8 taken from a bitmap.
+         */
         public Int32 heuristicSum(Microsoft.SPOT.Bitmap bitmapB)
         {
             Int32 RA = 0;
@@ -428,7 +426,7 @@ namespace Client
         }
 
 
-        /*
+        /**
          * This method throw allarm
          */
         private GT.Timer allarm;
@@ -480,7 +478,7 @@ namespace Client
                 
         }
 
-        /*
+        /**
          * This method recive a buffer from the server
          */
         private string reciveResponse(Socket clientSocket)
@@ -598,7 +596,7 @@ namespace Client
         {
             if (progress != null)
             {
-                progress.Value += 10;
+                progress.Value += 5;
                 progress.Invalidate();
             }
         }

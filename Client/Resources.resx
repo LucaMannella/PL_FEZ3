@@ -137,7 +137,7 @@
     <value>&lt;Glide Version="1.0.7"&gt;
   &lt;Window Name="instance115" Width="320" Height="240" BackColor="FFFFFF"&gt;
     &lt;TextBox Name="instance353" X="0" Y="0" Width="320" Height="32" Alpha="255" Text="ERROR" TextAlign="center" Font="6" FontColor="000000"/&gt;
-    &lt;TextBlock Name="instance488" X="63" Y="64" Width="249" Height="32" Alpha="255" Text="Impossible to connect to Server" TextAlign="left" TextVerticalAlign="bottom" Font="5" FontColor="F00000" BackColor="000000" ShowBackColor="False"/&gt;
+    &lt;TextBlock Name="instance488" X=awBackColor="False"/&gt;
     &lt;TextBlock Name="instance36654" X="90" Y="94" Width="150" Height="32" Alpha="255" Text="Contact an Administrator" TextAlign="Left" TextVerticalAlign="Top" Font="4" FontColor="F00000" BackColor="000000" ShowBackColor="False"/&gt;
   &lt;/Window&gt;
 &lt;/Glide&gt;</value>
