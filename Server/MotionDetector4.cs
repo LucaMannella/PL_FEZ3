@@ -158,7 +158,7 @@ namespace Server
                     }
                 }
                 //TODO salvare questa sul db non l'altra
-                String picturePath = Constants.IMAGE_DIRECTORY +"rect"+ cont + ".jpg";
+                String picturePath = Constants.SERVER_DIRECTORY + Constants.IMAGE_RELATIVE_PATH + "rect" + cont + ".jpg";
                 cont++;
                 image.Save(picturePath);
                 /*

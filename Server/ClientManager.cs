@@ -222,13 +222,13 @@ namespace Server
 
             var imageConverter = new ImageConverter();
             var image = (Image)imageConverter.ConvertFrom(buffer);
-            String picturePath = Constants.IMAGE_DIRECTORY + cont + ".jpg";
+            String picturePath = Constants.IMAGE_RELATIVE_PATH+"\\"+myMac+"\\"+cont+".jpg";
             cont++;
 
             Bitmap a = new Bitmap(image);
             try {
-                a.Save(picturePath);
-                ok = mDatabase.insertSuspiciousPicturePath(myMac, CurrentTimeMillis(), picturePath);
+                a.Save(Constants.SERVER_DIRECTORY + picturePath);
+                ok = mDatabase.insertSuspiciousPicturePath(myMac, CurrentTimeMillis(), @"\" + picturePath);
                 if (!ok)
                     Console.WriteLine("Error: Impossible to store picture: " + picturePath + " on the database!\n");
             }

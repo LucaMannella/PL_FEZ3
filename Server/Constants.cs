@@ -5,8 +5,9 @@ public static class Constants
     // modify also this address in Service.App.config
     public static String SERVER_IP_ADDR = "192.168.56.1";
     public static int PORT = 1500;
-    
-    public static String IMAGE_DIRECTORY = @"C:\Users\Alfonso-LAPTOP\Desktop\image";
+
+    public static String IMAGE_RELATIVE_PATH = @"fez03\suspicious_pictures\";
+    public static String SERVER_DIRECTORY = @"C:\xampp\htdocs\";
 
     public static String MAIL_RECEIVER = "valenzise@tiscali.it";
     public static String MAIL_SENDER = "fez03noreply@gmail.com";

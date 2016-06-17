@@ -30,10 +30,11 @@ SERVER SIDE
 	2.1) Memorizzare l'immagine iniziale					(fatto)
 	2.2) Ricevere immagini ed elaboro						(fatto)		
 	2.3) Memorizzare immagini sul database					(fatto)
-	2.4) Inviare risposta ai client							(fatto)
-	2.5) Inviare e-mail all'utente							(fatto)
+	2.4) Ma la sicurezza sul trasferimento dell'immagine?!	<--- da fare
+	2.5) Inviare risposta ai client							(fatto)
+	2.6) Inviare e-mail all'utente							(fatto)
 
-3) Gestione eccezioni										<--- da fare
+3) Gestione eccezioni										<--- in progress
 
  --- da aggiungere: ---
 1) web application											<--- in progress
@@ -54,4 +55,4 @@ Website
 --------------------------------------------------------------------------
 1) Registrazione account									(fatto)
 2) Miglioramente interfaccia grafica						(fatto)
-3) Gestione delle immagini da web application				<--- da fare
+3) Gestione delle immagini da web application				<--- in progress
