@@ -85,7 +85,7 @@ ALTER TABLE `clients`
 -- Indexes for table `customers`
 --
 ALTER TABLE `customers`
-  ADD PRIMARY KEY (`MAC`);
+  ADD PRIMARY KEY (`MAC`), ADD UNIQUE KEY `email` (`email`);
 
 --
 -- Indexes for table `suspicious_pictures`

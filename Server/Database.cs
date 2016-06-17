@@ -145,7 +145,7 @@ namespace Server
         }
 
         /**
-         * This checks if exists a specified client inside the database
+         * This method checks if exists a specified client inside the database
          * with the specified MACAddress.
          * 
          * @param MACAddress - The MAC address of the client.
@@ -167,6 +167,29 @@ namespace Server
         }
 
         /**
+         * This method checks if exists a specified client inside the database
+         * with the specified MACAddress and the specified PIN.
+         * 
+         * @param MACAddress - The MAC address of the client.
+         * @parama PIN - The PIN related to this client.
+         * @returns True if the login is valid, false otherwise.
+         */
+        public bool isValidClient(String MACAddress, String PIN)
+        {
+            if (!connection_Opened) {
+                if (OpenConnect() == false)
+                    return false;
+            }
+
+            String query = "SELECT * FROM customers WHERE MAC = '"+MACAddress+"' AND pin = '"+PIN+"';";
+            DataRowCollection records = GetRowsWhithQuery(query, "clients");
+            if (records.Count <= 0)
+                return false;
+            else
+                return true;
+        }
+
+        /**
          * This method allows to remove a connection with a client
          * from the database. It should be called when a device
          * will go correctly down.
@@ -176,8 +199,7 @@ namespace Server
          */
         public bool removeClient(String MACAddress)
         {
-            if (!connection_Opened)
-            {
+            if (!connection_Opened) {
                 if (OpenConnect() == false)
                     return false;
             }
@@ -199,8 +221,7 @@ namespace Server
          */
         public bool removeAllClient()
         {
-            if (!connection_Opened)
-            {
+            if (!connection_Opened) {
                 if (OpenConnect() == false)
                     return false;
             }
