@@ -199,8 +199,7 @@ namespace Server
          */
         public bool removeClient(String MACAddress)
         {
-            if (!connection_Opened)
-            {
+            if (!connection_Opened) {
                 if (OpenConnect() == false)
                     return false;
             }
@@ -222,8 +221,7 @@ namespace Server
          */
         public bool removeAllClient()
         {
-            if (!connection_Opened)
-            {
+            if (!connection_Opened) {
                 if (OpenConnect() == false)
                     return false;
             }
