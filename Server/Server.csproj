@@ -76,7 +76,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Image1.bmp" />
     <EmbeddedResource Include="Resources\1.gif" />
     <EmbeddedResource Include="Resources\2.gif" />
     <EmbeddedResource Include="Resources\3.gif" />

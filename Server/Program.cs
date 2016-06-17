@@ -82,45 +82,57 @@ namespace Server
          */ 
         private void manageCommand() {
             String cmd = s.receiveString();
-            switch (cmd)
+            try
             {
-                case "getPort\0":
-                    Console.WriteLine(cmd);
-                    String macaddr = s.receiveString();
-                    Console.WriteLine(macaddr);
+                switch (cmd)
+                {
+                    case "getPort\0":
+                        Console.WriteLine(cmd);
+                        String macaddr = s.receiveString();
+                        Console.WriteLine(macaddr);
 
-                    String macToCheck = macaddr.Substring(0, macaddr.Length-1);
+                        String macToCheck = macaddr.Substring(0, macaddr.Length - 1);
 
-                    if (!db.existClient(macToCheck))
-                    {
-                        int port = startingport + progressiveport;
-                        progressiveport++;
+                        if (!db.existClient(macToCheck))
+                        {
+                            int port = startingport + progressiveport;
+                            progressiveport++;
 
-                        Boolean ok = db.insertClient(macaddr, port);
-                        if (!ok) {
-                            Console.WriteLine("Error: Impossible to save new client in db!");
-                            sendPort(-1);
-                            return;
+                            Boolean ok = db.insertClient(macaddr, port);
+                            if (!ok)
+                            {
+                                Console.WriteLine("Error: Impossible to save new client in db!");
+                                sendPort(-1);
+                                return;
+                            }
+
+                            sendPort(port);
+
+                            // This method manage the comunication between this client and the server.
+                            ClientManager client = new ClientManager(macaddr, port);
+                            client.start();
+
+                            Console.WriteLine("Client: " + macaddr + " on port: " + port + " has ended!\n");
                         }
+                        else
+                        {
+                            Console.WriteLine("Error: Device: " + macaddr + " it is already present in the database!\n");
+                            sendPort(-1);
+                        }
+                        break;
 
-                        sendPort(port);
+                    default:
+                        Console.WriteLine("Error: received unknown request!\nCommand: " + cmd + "\n");
+                        break;
+                }
+            }
+            catch (Exception e) {
+                Console.WriteLine("Error: manage commeand "+e.Message+"\n");
 
-                        // This method manage the comunication between this client and the server.
-                        ClientManager client = new ClientManager(macaddr, port);
-                        client.start();
-
-                        Console.WriteLine("Client: " + macaddr + " on port: " + port + " has ended!\n");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Error: Device: " + macaddr + " it is already present in the database!\n");
-                        sendPort(-1);
-                    }
-                    break;
-                    
-                default:
-                    Console.WriteLine("Error: received unknown request!\nCommand: "+cmd+"\n");
-                    break;
+                if(s != null){
+                    s.Close();
+                }
+                
             }
         }
  
@@ -132,7 +144,6 @@ namespace Server
         {
             string myString = port.ToString() + '\0';
             byte[] toSend = System.Text.Encoding.UTF8.GetBytes(myString);
-
             s.Send(toSend, toSend.Length, SocketFlags.None);
         }
 
