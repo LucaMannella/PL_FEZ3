@@ -20,7 +20,7 @@ namespace FinalService
         Boolean keepAlive(string myMacAddress, long mycurrentTime, int port);
 
         [OperationContract]
-        Boolean isValid(String mac, String pin);
+        Boolean isValid(String mac, byte[] pin);
 
         // TODO: aggiungere qui le operazioni del servizio
     }

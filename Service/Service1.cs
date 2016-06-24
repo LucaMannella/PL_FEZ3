@@ -89,10 +89,11 @@ namespace FinalService
 
         }
 
-        public Boolean isValid(String mac, String pin)
+        public Boolean isValid(String mac, byte[] pin)
         {
+            String str = System.Text.Encoding.Default.GetString(pin);
             mDatabase = Database.getInstance();
-            Boolean bRet = mDatabase.isValidClient(mac, pin);
+            Boolean bRet = mDatabase.isValidClient(mac, str);
             return bRet;
         }
 

@@ -68,6 +68,7 @@ namespace Client
 
         static void btnOk_TapEvent(object sender)
         {
+            
             //Todo check pin with service
             Boolean ret = false;
             String pass = password.Text;
@@ -87,8 +88,8 @@ namespace Client
             {
                 //visualizzare pin errato
             }
-                
-          
+            
+           // showWindowSetupCamera();
         }
 
     

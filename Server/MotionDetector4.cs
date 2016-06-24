@@ -28,7 +28,7 @@ namespace Server
         private static readonly DateTime Jan1st1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         private FiltersSequence processingFilter1 = new FiltersSequence();
         private BlobCounter blobCounter = new BlobCounter();
-
+        public static String lastimage;
         private Bitmap backgroundFrame;
         private BitmapData bitmapData;
         private int counter = 0;
@@ -169,9 +169,11 @@ namespace Server
                 strValue = Regex.Replace(strValue, @"-", "");
                 strValue = strValue.Remove(strValue.Length - 1);
                 String picturePath = Constants.SERVER_DIRECTORY + Constants.IMAGE_RELATIVE_PATH + strValue + "\\" + "rect" + cont + ".jpg";
+                String RelativePath = Constants.IMAGE_RELATIVE_PATH + strValue + "\\" + "rect" + cont + ".jpg";
                 cont++;
                 image.Save(picturePath);
-                Boolean ok = mDatabase.insertSuspiciousPicturePath(mac, CurrentTimeMillis(), @"\" + picturePath);
+                lastimage = picturePath;
+                Boolean ok = mDatabase.insertSuspiciousPicturePath(mac, CurrentTimeMillis(), @"\" + RelativePath);
                 if (!ok)
                     Console.WriteLine("Error: Impossible to store picture: " + picturePath + " on the database!\n");
                 g.Dispose();

@@ -6,7 +6,7 @@ public static class Constants
     public static String SERVER_IP_ADDR = "192.168.137.1";
     public static int PORT = 1500;
 
-    public static String IMAGE_RELATIVE_PATH = @"fez03\";
+    public static String IMAGE_RELATIVE_PATH = @"fez03\\";
     public static String SERVER_DIRECTORY = @"C:\xampp\htdocs\";
 
     public static String MAIL_RECEIVER = "valenzise@tiscali.it";

@@ -20,6 +20,8 @@ namespace Server
         private const string UNKNOW_COMMND = "400BAD_REQUEST-";
         private const string ALARM = "yes-";
         private const string NOALARM = "no-";
+        MySocket clientsock;
+        private Boolean isdead = false;
 
        // MotionDetector3Optimized motionDetector;
         //oppure usare:
@@ -61,7 +63,7 @@ namespace Server
             try {
                 Thread keepalive = new Thread(() => checkKeepAlive());
                 keepalive.Start();
-
+                
                 listener.Bind(localEndPoint);
                 listener.Listen(2); // Start listening for connections.
             }
@@ -73,7 +75,7 @@ namespace Server
                 return;
             }
 
-            while (true)
+            while (!isdead)
             {
                 try
                 {
@@ -82,7 +84,7 @@ namespace Server
                     // Program is suspended while waiting for an incoming connection.
                     handlerClient = listener.Accept();
 
-                    MySocket clientsock = new MySocket(handlerClient);
+                    clientsock = new MySocket(handlerClient);
 
                     String cmd = receiveString(clientsock.s);
                     switch (cmd)
@@ -110,13 +112,14 @@ namespace Server
                             strValue = strValue.Remove(strValue.Length - 1);
 
                             String picturePath = Constants.SERVER_DIRECTORY + Constants.IMAGE_RELATIVE_PATH + strValue + "\\" + "referenceimage" + ".jpg";
+                            String relativePath = Constants.IMAGE_RELATIVE_PATH + strValue + "\\" + "referenceimage" + ".jpg";
                             bool exists = System.IO.Directory.Exists(Constants.SERVER_DIRECTORY + Constants.IMAGE_RELATIVE_PATH + "\\" + strValue);
                             if(!exists)
                                 System.IO.Directory.CreateDirectory(Constants.SERVER_DIRECTORY + Constants.IMAGE_RELATIVE_PATH + "\\" + strValue);
                             try
                             {
                                 current1.Save(picturePath);
-                                ok = mDatabase.insertSuspiciousPicturePath(myMac, CurrentTimeMillis(), @"\" + picturePath);
+                                ok = mDatabase.insertSuspiciousPicturePath(myMac, CurrentTimeMillis(), @"\" + relativePath);
                                 if (!ok)
                                     Console.WriteLine("Error: Impossible to store picture: " + picturePath + " on the database!\n");
                             }
@@ -169,8 +172,9 @@ namespace Server
 
             while (check) {
                 if(lastTime != 0) {
-                    if (CurrentTimeMillis() - lastTime > 45000)
+                    if (CurrentTimeMillis() - lastTime > 50000)
                     {
+                        Console.WriteLine("Warning client disconnected \n");
                         String mac = myMac.Remove(myMac.Length-1);
                         String subject = "Warning client disconnected";
                         String message = "The client: "+mac+" has shut down at: "
@@ -179,6 +183,8 @@ namespace Server
                         mDatabase.removeClient(mac);  // removing the client from the database
                         sendMail(subject, message, null);
                         check = false;
+                        clientsock.Close();
+                        isdead = true;
                     }
                 }
             }
@@ -209,6 +215,9 @@ namespace Server
                     socket.Send(toSend, toSend.Length, SocketFlags.None);
                     socket.Close();
                     Console.WriteLine("Allarme Scattato!\n");
+                    isdead = true;
+                    sendMail("Alarm", "The client" + myMac.Remove(0,myMac.Length-1) +" has detected a sospicious motion, the alarm was thrown", MotionDetector4.lastimage);
+
                 }
                 else
                 {

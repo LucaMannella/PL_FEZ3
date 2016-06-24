@@ -276,7 +276,7 @@ namespace tempuri.org
         public string mac;
         
         [DataMember(Order=1, IsNillable=true, IsRequired=false)]
-        public string pin;
+        public byte[] pin;
     }
     
     public class isValidDataContractSerializer : DataContractSerializer
@@ -308,7 +308,21 @@ namespace tempuri.org
                 if (IsChildStartElement(reader, "pin", true, false))
                 {
                     reader.Read();
-                    isValidField.pin = reader.ReadString();
+                    string[] pin_List = reader.ReadString().Split();
+                    if ((this._CompressByteArrays 
+                                || ((pin_List.Length == 1) 
+                                && (pin_List[0].Length > 2))))
+                    {
+                        isValidField.pin = Convert.FromBase64String(pin_List[0]);
+                    }
+                    else
+                    {
+                        isValidField.pin = new byte[pin_List.Length];
+                        for (int i = 0; (i < pin_List.Length); i = (i + 1))
+                        {
+                            isValidField.pin[i] = XmlConvert.ToByte(pin_List[i]);
+                        }
+                    }
                     reader.ReadEndElement();
                 }
                 reader.ReadEndElement();
@@ -328,7 +342,28 @@ namespace tempuri.org
                 }
                 if (WriteChildElement(writer, "pin", true, false, isValidField.pin))
                 {
-                    writer.WriteString(isValidField.pin);
+                    string pin_List = "";
+                    if (this._CompressByteArrays)
+                    {
+                        if ((isValidField.pin != null))
+                        {
+                            pin_List = Convert.ToBase64String(isValidField.pin);
+                        }
+                        writer.WriteString(pin_List);
+                    }
+                    else
+                    {
+                        for (int i = 0; (i < isValidField.pin.Length); i = (i + 1))
+                        {
+                            pin_List = (pin_List + XmlConvert.ToString(isValidField.pin[i]));
+                            if ((i 
+                                        < (isValidField.pin.Length - 1)))
+                            {
+                                pin_List = (pin_List + " ");
+                            }
+                        }
+                        writer.WriteString(pin_List);
+                    }
                     writer.WriteEndElement();
                 }
                 writer.WriteEndElement();

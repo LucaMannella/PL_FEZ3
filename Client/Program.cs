@@ -54,7 +54,8 @@ namespace Client
         private Boolean NetworkUp = false;
         IService1ClientProxy proxy;
         IPEndPoint serverEndPoint = null;  // represent the connection with the server
-
+        TimeSpan interval = new TimeSpan(0, 0, 30);
+        
         /**
          * This method is run when the mainboard is powered up or reset.   
          */
@@ -65,7 +66,7 @@ namespace Client
 
             Thread.Sleep(300);
             InitSensors();
-            
+          
             SetupEthernet();
             ethernetJ11D.NetworkUp += OnNetworkUp;
             ethernetJ11D.NetworkDown += OnNetworkDown;
@@ -112,7 +113,7 @@ namespace Client
                 invalidate = false;
                 setupJoystick();
             }
-
+            Debug.Print("Refresh streaming");
             displayT35.SimpleGraphics.DisplayImage(e, 0, 0);
         }
 
@@ -122,8 +123,10 @@ namespace Client
         private void button_ButtonPressed(GTM.GHIElectronics.Button sender, GTM.GHIElectronics.Button.ButtonState state)
         {
             Debug.Print("Button pressed!");
+            button.ButtonPressed += null;
             camera.StopStreaming();
             timer_joystick.Stop();
+            Thread.Sleep(300);
 
             if (NetworkUp)
             {
@@ -147,7 +150,7 @@ namespace Client
         {
             bindProxyService();
             getAddressAndPort();
-
+           
             IPAddress ipAddress = IPAddress.Parse(connectionInfo[0]);
             int port = int.Parse(connectionInfo[1]);
             if (port == -1)
@@ -253,6 +256,7 @@ namespace Client
                     PreviousAverage = RGlobal / 9;
                     sendPicture(picture.PictureData, true);
                     setupCameraTakePicture();
+                    WindowsManager.showWindowInsertPin();
                     return;
                 }
 
@@ -273,7 +277,7 @@ namespace Client
                 RGlobal = HeurSum;
                 PreviousAverage = average;
 
-                displayT35.SimpleGraphics.DisplayImage(picture, 0, 0); //TODO eliminare alla fine
+              //  displayT35.SimpleGraphics.DisplayImage(picture, 0, 0); //TODO eliminare alla fine
             }
             catch (SocketException e)
             {
@@ -507,18 +511,41 @@ namespace Client
 
         public Boolean checkLogin(String pin)
         {
-            HashAlgorithm hashSHA256 = new HashAlgorithm(HashAlgorithmType.SHA256);
-            Byte[] dataToHmac = System.Text.Encoding.UTF8.GetBytes(pin+"lms_fez03");
-            String signature = Convert.ToBase64String(hashSHA256.ComputeHash(dataToHmac));
-            var data = proxy.isValid(new isValid()
+           // HashAlgorithm hashSHA256 = new HashAlgorithm(HashAlgorithmType.MD5);
+            Byte[] dataToHmac = System.Text.Encoding.UTF8.GetBytes(pin);
+
+            if (setupComplete)
+            {
+                var data = proxy.isValid(new isValid()
+                {
+                    mac = myMac,
+                    pin = dataToHmac
+
+                });
+
+                if (data.isValidResult)
+                {
+                    deactivateSystem();
+                }
+                return false ;
+            }
+
+            bindProxyService();
+
+            var data2 = proxy.isValid(new isValid()
             {
                 mac = myMac,
-                pin = signature
+                pin = dataToHmac
               
             });
 
-            return data.isValidResult;
+            return data2.isValidResult;
 
+        }
+
+        private void deactivateSystem()
+        {
+            SpegniAllarme();
         }
 // ----------------------- End Network & Connections ----------------------- //
 
@@ -567,7 +594,7 @@ namespace Client
         {
             Mainboard.SetDebugLED(true);
             Gadgeteer.Socket socket = Gadgeteer.Socket.GetSocket(8, true, null, null);
-            pir_sensor = extender.CreateDigitalInput(Gadgeteer.Socket.Pin.Four,GlitchFilterMode.Off,ResistorMode.Disabled);
+      //      pir_sensor = extender.CreateDigitalInput(Gadgeteer.Socket.Pin.Four,GlitchFilterMode.Off,ResistorMode.Disabled);
             buzzer_sensor = extender.CreatePwmOutput(Gadgeteer.Socket.Pin.Nine);
             movimento_orizzontale = extender.CreatePwmOutput(Gadgeteer.Socket.Pin.Seven);
             movimento_verticale = extender.CreatePwmOutput(Gadgeteer.Socket.Pin.Eight);
@@ -582,7 +609,7 @@ namespace Client
         private void setupJoystick()
         {
             joystick.Calibrate();
-            timer_joystick = new GT.Timer(100);
+            timer_joystick = new GT.Timer(200);
             timer_joystick.Tick += joystick_function;
             timer_joystick.Start();
 
@@ -606,6 +633,7 @@ namespace Client
         {
             allarm.Stop();
             buzzer_sensor.IsActive = false;
+            buzzer_sensor.Set(0, 0);
             return;
         }
 
