@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
+using System.Security.Cryptography;
 using System.Threading;
 
 namespace Server
@@ -20,9 +21,7 @@ namespace Server
         public static Database getInstance()
         {
             if (myInstance == null)
-            {
                 myInstance = new Database();
-            }
 
             return myInstance;
         }
@@ -176,12 +175,20 @@ namespace Server
          */
         public bool isValidClient(String MACAddress, String PIN)
         {
+            String hashedPIN = String.Empty;
+
             if (!connection_Opened) {
                 if (OpenConnect() == false)
                     return false;
             }
 
-            String query = "SELECT * FROM customers WHERE MAC = '"+MACAddress+"' AND pin = '"+PIN+"';";
+            Byte[] bytePIN = Encoding.UTF8.GetBytes(PIN+"lms_fez03");
+            Byte[] hashedArray = new SHA256Managed().ComputeHash(bytePIN);
+
+            foreach (byte x in hashedArray)
+                hashedPIN += String.Format("{0:x2}", x);
+            
+            String query = "SELECT * FROM customers WHERE MAC = '"+MACAddress+"' AND pin = '"+hashedPIN+"';";
             DataRowCollection records = GetRowsWhithQuery(query, "clients");
             if (records.Count <= 0)
                 return false;
