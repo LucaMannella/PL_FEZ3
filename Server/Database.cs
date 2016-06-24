@@ -190,6 +190,27 @@ namespace Server
         }
 
         /**
+         * This method returns the email address related to given MAC address.
+         * 
+         * @param MACAddress - The MAC address of the client.
+         * @returns A string containing the MAC address.
+         */
+        public String getClientEmail(String MACAddress)
+        {
+            if (!connection_Opened) {
+                if (OpenConnect() == false)
+                    return null;
+            }
+
+            String query = "SELECT email FROM customers WHERE MAC = '"+MACAddress+"';";
+            DataRowCollection records = GetRowsWhithQuery(query, "clients");
+            if (records.Count <= 0)
+                return null;
+            else
+                return records[0]["email"].ToString();
+        }
+
+        /**
          * This method allows to remove a connection with a client
          * from the database. It should be called when a device
          * will go correctly down.
