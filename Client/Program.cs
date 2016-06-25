@@ -40,7 +40,7 @@ namespace Client
         private DigitalInput pir_sensor = null;
         private PwmOutput buzzer_sensor = null;
         private bool throw_allarm = false;
-        private PwmOutput movimento_orizzontale=null,movimento_verticale=null;
+        private PwmOutput orizzontal_mov=null,vertical_mov=null;
         private Joystick.Position joystickPosition;
         private double current_orizzontal_pos = 0, current_vertical_pos=0;
         private string myMac;
@@ -478,7 +478,8 @@ namespace Client
             if (setupComplete)
             {
                 timer_keepAlive.Stop();
-                ThrowAllarm();
+                if(!throw_allarm)
+                    ThrowAllarm();
             }
                 
         }
@@ -573,7 +574,7 @@ namespace Client
             {
                 if (current_orizzontal_pos + realX / 80 <= 0.1 && current_orizzontal_pos + realX / 80 >= 0.05)
                 {
-                    movimento_orizzontale.Set(50, current_orizzontal_pos + realX / 80);
+                    orizzontal_mov.Set(50, current_orizzontal_pos + realX / 80);
                     current_orizzontal_pos = current_orizzontal_pos + realX / 80;
                 }
             }
@@ -581,7 +582,7 @@ namespace Client
             {
                 if (current_vertical_pos + realY / 80 <= 0.1 && current_vertical_pos + realY / 80 >= 0.05)
                 {
-                    movimento_verticale.Set(50, current_vertical_pos + realY / 80);
+                    vertical_mov.Set(50, current_vertical_pos + realY / 80);
                     current_vertical_pos = current_vertical_pos + realY / 80;
                 }
             }
@@ -596,13 +597,13 @@ namespace Client
             Gadgeteer.Socket socket = Gadgeteer.Socket.GetSocket(8, true, null, null);
       //      pir_sensor = extender.CreateDigitalInput(Gadgeteer.Socket.Pin.Four,GlitchFilterMode.Off,ResistorMode.Disabled);
             buzzer_sensor = extender.CreatePwmOutput(Gadgeteer.Socket.Pin.Nine);
-            movimento_orizzontale = extender.CreatePwmOutput(Gadgeteer.Socket.Pin.Seven);
-            movimento_verticale = extender.CreatePwmOutput(Gadgeteer.Socket.Pin.Eight);
+            orizzontal_mov = extender.CreatePwmOutput(Gadgeteer.Socket.Pin.Seven);
+            vertical_mov = extender.CreatePwmOutput(Gadgeteer.Socket.Pin.Eight);
             current_orizzontal_pos = 0.075;
             current_vertical_pos = 0.075;
-            movimento_orizzontale.Set(50, current_orizzontal_pos);
+            orizzontal_mov.Set(50, current_orizzontal_pos);
             Thread.Sleep(2000);
-            movimento_verticale.Set(50, current_vertical_pos);
+            vertical_mov.Set(50, current_vertical_pos);
              
         }
 
@@ -632,8 +633,7 @@ namespace Client
         private void SpegniAllarme()
         {
             allarm.Stop();
-            buzzer_sensor.IsActive = false;
-            buzzer_sensor.Set(0, 0);
+            buzzer_sensor.IsActive = false;            
             return;
         }
 
