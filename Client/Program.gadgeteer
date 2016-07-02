@@ -147,8 +147,8 @@
           <moduleHasSocketUses Id="ecde13c3-3e08-4101-866b-93fb269b1248">
             <socketUse Id="e71542b7-06b9-476f-98b5-05aee9de910d" label="XY*">
               <socket>
-                <socketUseReferencesSocket Id="fd40a16f-f2b4-48f0-805e-e8859861a632">
-                  <socketMoniker Id="a3c6b455-fd17-4a44-92d6-331f91142f20" />
+                <socketUseReferencesSocket Id="c3d6e45b-6462-4bf7-a74a-5b86038d8013">
+                  <socketMoniker Id="8c4e5d40-8a0f-4d00-b129-bdf7d1172027" />
                 </socketUseReferencesSocket>
               </socket>
             </socketUse>
