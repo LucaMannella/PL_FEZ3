@@ -37,9 +37,14 @@ namespace Client
         internal enum StringResources : short
         {
             window_pin = -23392,
+            windows_service_down = -21596,
+            window_server_down = -18771,
+            window_camera_down = -9149,
             window_loading = -2759,
+            window_pin_corto = 2334,
             window_error_server = 4658,
             window_error_pin = 6527,
+            window_loading_static = 6660,
             window_error_service = 10389,
             window_network_down = 18276,
             window_setup_camera = 19777,

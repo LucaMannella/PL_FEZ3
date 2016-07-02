@@ -18,6 +18,7 @@ using Gadgeteer.Modules.GHIElectronics;
 using Ws.Services.Binding;
 using Ws.Services;
 using System.Security.Cryptography;
+using Microsoft.SPOT.Hardware;
 
 using Gadgeteer.SocketInterfaces;
 
@@ -33,6 +34,7 @@ namespace Client
         public const String KEEP_ALIVE_COMMAND = "keepAlive-";
         public const String MANAGE_IMAGE_COMMAND = "manageImage-";
         public const String FIRST_IMAGE_COMMAND = "firstImage-";
+        public const String UNBIND_COMMAND = "unbind-";
         private const string ALARM = "yes";
         private const string NOALARM = "no-";
         private const int CAMERA_INTERVAL = 3000;
@@ -44,38 +46,61 @@ namespace Client
         private Joystick.Position joystickPosition;
         private double current_orizzontal_pos = 0, current_vertical_pos=0;
         private string myMac;
+        public static Boolean cameraDisconnected = false;
         Bitmap bitmapA = null;
         Int32 RGlobal;
         Int32 PreviousAverage;
         long servertime = 0;
         private GT.Timer timer_joystick;
-        private Boolean StopMe = false;
         private Boolean setupComplete = false;
-        private Boolean NetworkUp = false;
+        public static Boolean NetworkUp = false;
+        private int contImage;
+        private Boolean StopAllarm = false;
         IService1ClientProxy proxy;
         IPEndPoint serverEndPoint = null;  // represent the connection with the server
         TimeSpan interval = new TimeSpan(0, 0, 30);
-        
+        PWM buzzer;
         /**
          * This method is run when the mainboard is powered up or reset.   
          */
         void ProgramStarted()
         {
             Debug.Print("Program Started");     // to show messages in "Output" window during debugging
-            Mainboard.SetDebugLED(true);
+            multicolorLED.TurnRed();
 
             Thread.Sleep(300);
             InitSensors();
           
             SetupEthernet();
-            ethernetJ11D.NetworkUp += OnNetworkUp;
-            ethernetJ11D.NetworkDown += OnNetworkDown;
-
+          
             camera.PictureCaptured += camera_PictureCaptured;
             camera.BitmapStreamed += camera_BitmapStreamed;
-          
 
+            camera.CameraDisconnected += camera_CameraDisconnected;
+            camera.CameraConnected += camera_CameraConnected;
             WindowsManager.showWindowInsertPin();
+        }
+
+        void camera_CameraConnected(Camera sender, EventArgs e)
+        {
+            cameraDisconnected = false;
+        }
+
+        void camera_CameraDisconnected(Camera sender, EventArgs e)
+        {
+            cameraDisconnected = true;
+            if (setupComplete)
+            {
+                timer_keepAlive.Stop();
+                if (!throw_allarm)
+                    ThrowAllarm();
+                WindowsManager.showWindowCameraDown();
+            }
+            else
+            {
+                WindowsManager.showWindowCameraDown();
+                return;
+            }
         }
 
 
@@ -91,8 +116,19 @@ namespace Client
             if (camera.CameraReady)
             {
                 button.ButtonPressed += button_ButtonPressed;
-                camera.StartStreaming();
+                invalidate = true;
+                serverUnreacheable = false;
                 progress = WindowsManager.showWindowProgress();
+            
+                try
+                {
+                    camera.StartStreaming();
+                }
+                catch (InvalidOperationException e)
+                {
+                    Debug.Print("Already Streaming");
+                }
+                
                 timer_progress = new GT.Timer(350);
                 timer_progress.Tick += progressIncrement;
                 timer_progress.Start();
@@ -103,18 +139,20 @@ namespace Client
          * This method is called when a new streamed image is captured
          */
         private Boolean invalidate = true;
-        private void camera_BitmapStreamed(GTM.GHIElectronics.Camera sender, Bitmap e)
+        private void camera_BitmapStreamed(GTM.GHIElectronics.Camera sender,                                                                                                                            Bitmap e)
         {
             if (invalidate)
             {
                 timer_progress.Stop();
+                Thread.Sleep(100); 
                 progress.Value = 100;
                 progress.Invalidate();
                 invalidate = false;
                 setupJoystick();
             }
             Debug.Print("Refresh streaming");
-            displayT35.SimpleGraphics.DisplayImage(e, 0, 0);
+            if(NetworkUp && !setupComplete && !serverUnreacheable)
+                displayT35.SimpleGraphics.DisplayImage(e, 0, 0);
         }
 
         /**
@@ -123,14 +161,14 @@ namespace Client
         private void button_ButtonPressed(GTM.GHIElectronics.Button sender, GTM.GHIElectronics.Button.ButtonState state)
         {
             Debug.Print("Button pressed!");
-            button.ButtonPressed += null;
+            button.ButtonPressed -= button_ButtonPressed;
             camera.StopStreaming();
             timer_joystick.Stop();
+            WindowsManager.showWindowLoadingStatic();
             Thread.Sleep(300);
 
             if (NetworkUp)
             {
-                // WindowsManager.setupWindowInsertPin();
                 initServer();
             }
             else
@@ -156,17 +194,42 @@ namespace Client
             if (port == -1)
             {
                 Debug.Print("Error: Invalid Port, impossible to establish a connection!\n");
-                //TODO terminare applicazione
+                WindowsManager.showWindowErrorServer();
+                return;
+            }
+            if (port == 404)
+            {
+                Debug.Print("Error: Server Unreacheable!\n");
+                serverUnreacheable = true;
+                WindowsManager.showWindowServerDown();
                 return;
             }
             serverEndPoint = new IPEndPoint(ipAddress, port);
+            servertime += 35000;
+            try
+            {
+                var data = proxy.keepAlive(new keepAlive()
+                {
+                    myMacAddress = myMac,
+                    mycurrentTime = servertime,
+                    port = int.Parse(connectionInfo[1]),
+                });
+            }
+            catch (SocketException e)
+            {
+
+                WindowsManager.showWindowErrorService();
+            }   
 
             timer_keepAlive = new GT.Timer(35000);
             timer_keepAlive.Tick += keepAlive;
             timer_keepAlive.Start();
 
+            bitmapA = null;
+            serverUnreacheable = false;
             setupComplete = true;
-            Thread.Sleep(500);
+            Thread.Sleep(400);
+            contImage = 0;
             camera.TakePicture();
         }
 
@@ -176,10 +239,19 @@ namespace Client
         private void bindProxyService()
         {
             Debug.Print("Binding proxy service...");
-            proxy = new IService1ClientProxy(new WS2007HttpBinding(), new ProtocolVersion11());
+            try
+            {
+                proxy = new IService1ClientProxy(new WS2007HttpBinding(), new ProtocolVersion11());
 
-            // NOTE: the endpoint needs to match the endpoint of the servicehost
-            proxy.EndpointAddress = SERVICE_ADDR;
+                // NOTE: the endpoint needs to match the endpoint of the servicehost
+                proxy.EndpointAddress = SERVICE_ADDR;
+
+            }
+            catch (SocketException e)
+            {
+                WindowsManager.showWindowServiceDown();
+            }
+           
 
             Debug.Print("Binding proxy service COMPLETE");
         }
@@ -205,7 +277,7 @@ namespace Client
                 Debug.Print("Server time: " + servertime);
 
             }
-            catch (SocketException e)
+            catch (Exception e)
             {
                 WindowsManager.showWindowErrorService();
             }
@@ -242,21 +314,29 @@ namespace Client
         {
             if (throw_allarm || picture==null)
                 return;
-
+            
             Int32 HeurSum = 0;
             Bitmap bitmapB = picture.MakeBitmap();
 
             Debug.Print("Image captured! ");
             try
             {
+               
+                if (contImage < 2)
+                {
+                    if(contImage==0)
+                        setupCameraTakePicture();
+                    contImage++;
+                    return;
+                }
+
                 if (bitmapA == null)    //per gestire la prima volta
                 {
+                    WindowsManager.showWindowInsertPin();
                     bitmapA = bitmapB;
                     RGlobal = heuristicSum(bitmapA);
                     PreviousAverage = RGlobal / 9;
                     sendPicture(picture.PictureData, true);
-                    setupCameraTakePicture();
-                    WindowsManager.showWindowInsertPin();
                     return;
                 }
 
@@ -434,14 +514,21 @@ namespace Client
         /**
          * This method throw allarm
          */
-        private GT.Timer allarm;
+        private GT.Timer timer_allarm;
+        private bool serverUnreacheable;
         private void ThrowAllarm()
         {
+            
+            camera.StopStreaming();
             throw_allarm = true;
+            StopAllarm = false;
             timer_getimage.Stop();
-            allarm = new GT.Timer(100);
-            allarm.Tick += allarm_Tick;
-            allarm.Start();
+            Thread.Sleep(500);
+            camera.StopStreaming();
+            buzzer.Start();
+            timer_allarm = new GT.Timer(300);
+            timer_allarm.Tick += allarm_Tick;
+            timer_allarm.Start();
         }
 
 // ------------------------- End State Machine ------------------------- //
@@ -452,6 +539,7 @@ namespace Client
         {
             ethernetJ11D.UseStaticIP(DEFAULT_MY_IP, MASK, DEFAULT_DESTINATION_IP);
             ethernetJ11D.UseThisNetworkInterface();
+            ethernetJ11D.NetworkUp += OnNetworkUp;
         }
 
         /**
@@ -463,6 +551,8 @@ namespace Client
             NetworkUp = true;
             multicolorLED.TurnGreen();
             ListNetworkInterfaces();
+            ethernetJ11D.NetworkDown += OnNetworkDown;
+            WindowsManager.showWindowInsertPin();
         }
  
         /**
@@ -473,13 +563,25 @@ namespace Client
         {
             Debug.Print("Network down!");
             NetworkUp = false;
+            if (proxy != null)
+            {
+                proxy.Dispose();
+            }
             multicolorLED.TurnRed();
-          
+
+
             if (setupComplete)
             {
                 timer_keepAlive.Stop();
                 if(!throw_allarm)
                     ThrowAllarm();
+            }
+            else
+            {
+                camera.StopStreaming();
+                Thread.Sleep(250);
+                WindowsManager.showWindowNetworkDown();
+                return;
             }
                 
         }
@@ -510,10 +612,16 @@ namespace Client
         }
 
 
-        public Boolean checkLogin(String pin)
+        public int checkLogin(String pin)
         {
            // HashAlgorithm hashSHA256 = new HashAlgorithm(HashAlgorithmType.MD5);
             Byte[] dataToHmac = System.Text.Encoding.UTF8.GetBytes(pin);
+
+            if (!NetworkUp)
+            {
+                WindowsManager.showWindowNetworkDown();
+                return 2;
+            }
 
             if (setupComplete)
             {
@@ -527,27 +635,83 @@ namespace Client
                 if (data.isValidResult)
                 {
                     deactivateSystem();
+                    return 2;
                 }
-                return false ;
+                return -1 ;
             }
 
             bindProxyService();
-
-            var data2 = proxy.isValid(new isValid()
+            
+            try
             {
-                mac = myMac,
-                pin = dataToHmac
-              
-            });
+                var data2 = proxy.isValid(new isValid()
+                {
+                    mac = myMac,
+                    pin = dataToHmac
 
-            return data2.isValidResult;
+                });
+                if (data2.isValidResult)
+                {
+                    return 0;
+                }
+                else
+                {
+                    return -1;
+                }
+                
+            }
+            catch (Exception e)
+            {
+                WindowsManager.showWindowServiceDown();
+                return 1;
+            }
 
         }
 
         private void deactivateSystem()
         {
-            SpegniAllarme();
+            
+            if (throw_allarm) {
+                SpegniAllarme();
+                throw_allarm = false;
+            }
+            else
+            {
+                unBind();
+            }
+            if (timer_keepAlive.IsRunning)
+            {
+                timer_keepAlive.Stop();
+            }
+            invalidate = true;
+            setupComplete = false;
+
+            WindowsManager.showWindowSetupCamera();
         }
+
+        
+        private void unBind()
+        {
+            byte[] cmd;
+            cmd = Encoding.UTF8.GetBytes(UNBIND_COMMAND);
+
+            Socket clientSocket = new Socket(
+                AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+            Debug.Print("Connecting to server " + serverEndPoint + ".");
+            clientSocket.Connect(serverEndPoint);
+            Debug.Print("Connected to server.");
+
+            clientSocket.Send(cmd);
+            /*
+            String response = reciveResponse(clientSocket);
+            Debug.Print("UnBind Result:"+response);
+            */
+            clientSocket.Close();
+
+
+        }
+      
 // ----------------------- End Network & Connections ----------------------- //
 
         private void joystick_function(GT.Timer timer)
@@ -595,10 +759,10 @@ namespace Client
         {
             Mainboard.SetDebugLED(true);
             Gadgeteer.Socket socket = Gadgeteer.Socket.GetSocket(8, true, null, null);
-      //      pir_sensor = extender.CreateDigitalInput(Gadgeteer.Socket.Pin.Four,GlitchFilterMode.Off,ResistorMode.Disabled);
-            buzzer_sensor = extender.CreatePwmOutput(Gadgeteer.Socket.Pin.Nine);
+            buzzer = new PWM(Cpu.PWMChannel.PWM_4, 1000, 0.5, false);
+            buzzer.Stop();
             orizzontal_mov = extender.CreatePwmOutput(Gadgeteer.Socket.Pin.Seven);
-            vertical_mov = extender.CreatePwmOutput(Gadgeteer.Socket.Pin.Eight);
+            vertical_mov = extender.CreatePwmOutput(Gadgeteer.Socket.Pin.Nine);
             current_orizzontal_pos = 0.075;
             current_vertical_pos = 0.075;
             orizzontal_mov.Set(50, current_orizzontal_pos);
@@ -624,16 +788,25 @@ namespace Client
 
         void allarm_Tick(GT.Timer timer)
         {
-            buzzer_sensor.Set(500, 0.5);
-            Thread.Sleep(1000);
-            buzzer_sensor.Set(1000, 0.5);
-            Thread.Sleep(1000);
+            if (!StopAllarm) {
+                buzzer.Frequency = 500;
+                Thread.Sleep(200);
+                buzzer.Frequency = 1000;
+                Thread.Sleep(200);
+            }
+            if (StopAllarm)
+            {
+                buzzer.Stop();
+            }
         }
 
         private void SpegniAllarme()
         {
-            allarm.Stop();
-            buzzer_sensor.IsActive = false;            
+            timer_allarm.Stop();
+            StopAllarm = true;
+            buzzer.Frequency = 0.1;
+            buzzer.Stop();
+ 
             return;
         }
 

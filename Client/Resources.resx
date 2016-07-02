@@ -124,11 +124,21 @@
   <data name="small" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\small.tinyfnt;System.Byte[], mscorlib, Culture=neutral, PublicKeyToken=null</value>
   </data>
+  <data name="windows_service_down" xml:space="preserve">
+    <value>&lt;Glide Version="1.0.7"&gt;
+  &lt;Window Name="instance115" Width="320" Height="240" BackColor="FFFFFF"&gt;
+    &lt;TextBox Name="instance1547" X="0" Y="0" Width="320" Height="32" Alpha="255" Text="WARNING" TextAlign="CENTER" Font="6" FontColor="000000"/&gt;
+    &lt;TextBlock Name="instance1968" X="10" Y="62" Width="310" Height="32" Alpha="255" Text="Impossible to contact the service" TextAlign="Left" TextVerticalAlign="Top" Font="5" FontColor="FF0000" BackColor="00000" ShowBackColor="False"/&gt;
+    &lt;TextBlock Name="instance5430" X="75" Y="93" Width="150" Height="32" Alpha="255" Text="Call an administrator" TextAlign="Left" TextVerticalAlign="Top" Font="4" FontColor="F00000" BackColor="000000" ShowBackColor="False"/&gt;
+    &lt;Button Name="back" X="118" Y="147" Width="80" Height="32" Alpha="255" Text="Back" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+  &lt;/Window&gt;
+&lt;/Glide&gt;</value>
+  </data>
   <data name="window_error_pin" xml:space="preserve">
     <value>&lt;Glide Version="1.0.7"&gt;
   &lt;Window Name="instance115" Width="320" Height="240" BackColor="FFFFFF"&gt;
     &lt;TextBox Name="instance353" X="0" Y="0" Width="320" Height="32" Alpha="255" Text="ERROR" TextAlign="center" Font="6" FontColor="000000"/&gt;
-    &lt;TextBlock Name="instance488" X="71" Y="63" Width="200" Height="32" Alpha="255" Text="The inserted pin is not correct " TextAlign="left" TextVerticalAlign="bottom" Font="5" FontColor="F00000" BackColor="000000" ShowBackColor="False"/&gt;
+    &lt;TextBlock Name="instance488" X="20" Y="63" Width="290" Height="32" Alpha="255" Text="The inserted pin is not correct " TextAlign="left" TextVerticalAlign="bottom" Font="5" FontColor="F00000" BackColor="000000" ShowBackColor="False"/&gt;
     &lt;Button Name="retry" X="117" Y="111" Width="80" Height="32" Alpha="255" Text="RETRY" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
   &lt;/Window&gt;
 &lt;/Glide&gt;</value>
@@ -198,12 +208,47 @@
   &lt;/Window&gt;
 &lt;/Glide&gt;</value>
   </data>
+  <data name="window_pin_corto" xml:space="preserve">
+    <value>&lt;Glide Version="1.0.7"&gt;
+  &lt;Window Name="instance115" Width="320" Height="240" BackColor="FFFFFF"&gt;
+    &lt;TextBox Name="instance353" X="0" Y="0" Width="320" Height="32" Alpha="255" Text="ERROR" TextAlign="center" Font="6" FontColor="000000"/&gt;
+    &lt;TextBlock Name="instance552" X="25" Y="75" Width="290" Height="40" Alpha="255" Text="The PIN must be 8 numbers" TextAlign="center" TextVerticalAlign="Top" Font="5" FontColor="F00000" BackColor="000000" ShowBackColor="False"/&gt;
+    &lt;Button Name="tryagain" X="110" Y="117" Width="120" Height="32" Alpha="255" Text="BACK" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+  &lt;/Window&gt;
+&lt;/Glide&gt;</value>
+  </data>
+  <data name="window_server_down" xml:space="preserve">
+    <value>&lt;Glide Version="1.0.7"&gt;
+  &lt;Window Name="instance115" Width="320" Height="240" BackColor="FFFFFF"&gt;
+    &lt;TextBox Name="instance353" X="0" Y="0" Width="320" Height="32" Alpha="255" Text="ERROR" TextAlign="center" Font="6" FontColor="000000"/&gt;
+    &lt;TextBlock Name="instance552" X="21" Y="75" Width="260" Height="40" Alpha="255" Text="The server is unreacheable" TextAlign="center" TextVerticalAlign="Top" Font="5" FontColor="F00000" BackColor="000000" ShowBackColor="False"/&gt;
+    &lt;Button Name="restart" X="94" Y="147" Width="120" Height="32" Alpha="255" Text="RESTART" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;TextBlock Name="instance5512" X="90" Y="104" Width="200" Height="32" Alpha="255" Text="Call an Administrator" TextAlign="Left" TextVerticalAlign="Top" Font="4" FontColor="F00000" BackColor="000000" ShowBackColor="False"/&gt;
+  &lt;/Window&gt;
+&lt;/Glide&gt;</value>
+  </data>
   <data name="window_setup_camera" xml:space="preserve">
     <value>&lt;Glide Version="1.0.7"&gt;
   &lt;Window Name="instance115" Width="320" Height="240" BackColor="FFFFFF"&gt;
     &lt;TextBox Name="instance438" X="0" Y="0" Width="320" Height="32" Alpha="255" Text="SETUP CAMERA" TextAlign="CENTER" Font="6" FontColor="000000"/&gt;
     &lt;TextBlock Name="instance1077" X="5" Y="39" Width="315" Height="80" Alpha="255" Text="To get started, click next button and use the joystick to set the camera in the desired position" TextAlign="left" TextVerticalAlign="Top" Font="5" FontColor="0" BackColor="000000" ShowBackColor="False"/&gt;
     &lt;Button Name="btn_next" X="115" Y="120" Width="80" Height="32" Alpha="255" Text="Next " Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+  &lt;/Window&gt;
+&lt;/Glide&gt;</value>
+  </data>
+  <data name="window_camera_down" xml:space="preserve">
+    <value>&lt;Glide Version="1.0.7"&gt;
+  &lt;Window Name="instance115" Width="320" Height="240" BackColor="FFFFFF"&gt;
+    &lt;TextBox Name="instance353" X="0" Y="0" Width="320" Height="32" Alpha="255" Text="ERROR" TextAlign="center" Font="6" FontColor="000000"/&gt;
+    &lt;TextBlock Name="instance822" X="31" Y="86" Width="260" Height="50" Alpha="255" Text="Camera is disconnected, check your hardware and retry !" TextAlign="center" TextVerticalAlign="Top" Font="5" FontColor="FF0000" BackColor="000000" ShowBackColor="False"/&gt;
+    &lt;Button Name="retry" X="120" Y="151" Width="80" Height="32" Alpha="255" Text="RETRY" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+  &lt;/Window&gt;
+&lt;/Glide&gt;</value>
+  </data>
+  <data name="window_loading_static" xml:space="preserve">
+    <value>&lt;Glide Version="1.0.7"&gt;
+  &lt;Window Name="instance115" Width="320" Height="240" BackColor="FFFFFF"&gt;
+    &lt;TextBlock Name="instance10429" X="99" Y="94" Width="130" Height="32" Alpha="255" Text="LOADING..." TextAlign="CENTER" TextVerticalAlign="Top" Font="6" FontColor="0" BackColor="000000" ShowBackColor="False"/&gt;
   &lt;/Window&gt;
 &lt;/Glide&gt;</value>
   </data>

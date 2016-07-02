@@ -30,6 +30,11 @@ namespace Client
 
         public static void showWindowInsertPin(){
 
+            if (!Program.NetworkUp)
+            {
+                showWindowNetworkDown();
+                return;
+            }
 
             Window window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.window_pin));
 
@@ -64,32 +69,33 @@ namespace Client
             btnOk.TapEvent += btnOk_TapEvent;
             
             Glide.MainWindow = window;
+            Glide.MainWindow.Invalidate();
         }
 
         static void btnOk_TapEvent(object sender)
         {
             
-            //Todo check pin with service
-            Boolean ret = false;
+            int ret = 2;
             String pass = password.Text;
             if (pass.Length == 8)
             {
+               showWindowLoadingStatic();
                ret = mProgram.checkLogin(pass);
             }
             else
             {
-                //visualizzare pin corto
+                showWindowPinCorto();
+                return;
             }
-            if (ret)
+            if (ret == 0)
             {
                 showWindowSetupCamera();
             }
-            else
+            else if(ret == -1)
             {
-                //visualizzare pin errato
+                showWindowErrorPin();
             }
             
-           // showWindowSetupCamera();
         }
 
     
@@ -219,19 +225,67 @@ namespace Client
 
         public static void showWindowSetupCamera()
         {
-
-
+            if (!Program.NetworkUp)
+            {
+                showWindowNetworkDown();
+                return;
+            }
             Window window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.window_setup_camera));
             GHI.Glide.UI.Button btnNext = (GHI.Glide.UI.Button)window.GetChildByName("btn_next");
 
             btnNext.TapEvent += btnNext_TapEvent;
             GlideTouch.Initialize();
             Glide.MainWindow = window;
+            Glide.MainWindow.Invalidate();
+        }
+
+        public static void showWindowServiceDown()
+        {
+
+            if (!Program.NetworkUp)
+            {
+                showWindowNetworkDown();
+                return;
+            }
+            Window window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.windows_service_down));
+            GHI.Glide.UI.Button btnBack = (GHI.Glide.UI.Button)window.GetChildByName("back");
+
+            btnBack.TapEvent += btnBack_TapEvent;
+            GlideTouch.Initialize();
+            Glide.MainWindow = window;
+            Glide.MainWindow.Invalidate();
+
+        }
+
+        public static void showWindowServerDown()
+        {
+
+            if (!Program.NetworkUp)
+            {
+                showWindowNetworkDown();
+                return;
+            }
+            Window window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.window_server_down));
+            GHI.Glide.UI.Button btnRestart = (GHI.Glide.UI.Button)window.GetChildByName("restart");
+
+            btnRestart.TapEvent += btnRestart_TapEvent;
+            GlideTouch.Initialize();
+            Glide.MainWindow = window;
+            Glide.MainWindow.Invalidate();
+        }
+
+        static void btnRestart_TapEvent(object sender)
+        {
+            showWindowSetupCamera();
+        }
+
+        static void btnBack_TapEvent(object sender)
+        {
+            showWindowInsertPin();
         }
 
         public static GHI.Glide.UI.ProgressBar showWindowProgress()
         {
-
 
             Window window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.window_loading));
             GHI.Glide.UI.ProgressBar progress = (GHI.Glide.UI.ProgressBar)window.GetChildByName("progress");
@@ -241,6 +295,7 @@ namespace Client
 
             GlideTouch.Initialize();
             Glide.MainWindow = window;
+            Glide.MainWindow.Invalidate();
             return progress;
         }
 
@@ -253,17 +308,23 @@ namespace Client
             btnRetry.TapEvent += btnRetry_TapEvent;
             GlideTouch.Initialize();
             Glide.MainWindow = window;
+            Glide.MainWindow.Invalidate();
         }
 
         public static void showWindowErrorPin()
         {
-
+            if (!Program.NetworkUp)
+            {
+                showWindowNetworkDown();
+                return;
+            }
             Window window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.window_error_pin));
             GHI.Glide.UI.Button btnRetryerrorpin = (GHI.Glide.UI.Button)window.GetChildByName("retry");
 
             btnRetryerrorpin.TapEvent += btnRetryerrorpin_TapEvent;
             GlideTouch.Initialize();
             Glide.MainWindow = window;
+            Glide.MainWindow.Invalidate();
         }
 
         public static void showWindowNotRegistered()
@@ -275,22 +336,85 @@ namespace Client
             btnBack.TapEvent += btnRetryerrorpin_TapEvent;
             GlideTouch.Initialize();
             Glide.MainWindow = window;
+            Glide.MainWindow.Invalidate();
+        }
+
+        public static void showWindowPinCorto()
+        {
+
+            Window window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.window_pin_corto));
+            GHI.Glide.UI.Button btnTryAgain = (GHI.Glide.UI.Button)window.GetChildByName("tryagain");
+
+            btnTryAgain.TapEvent += btnTryAgain_TapEvent;
+            GlideTouch.Initialize();
+            Glide.MainWindow = window;
+            Glide.MainWindow.Invalidate();
+        }
+
+        static void btnTryAgain_TapEvent(object sender)
+        {
+            showWindowInsertPin();
         }
 
         public static void showWindowErrorService()
         {
-
+            if (!Program.NetworkUp)
+            {
+                showWindowNetworkDown();
+                return;
+            }
             Window window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.window_error_service));
  
             Glide.MainWindow = window;
+            Glide.MainWindow.Invalidate();
         }
 
         public static void showWindowErrorServer()
         {
-
+            if (!Program.NetworkUp)
+            {
+                showWindowNetworkDown();
+                return;
+            }
             Window window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.window_error_server));
 
             Glide.MainWindow = window;
+            Glide.MainWindow.Invalidate();
+        }
+
+        public static void showWindowLoadingStatic()
+        {
+            if (!Program.NetworkUp)
+            {
+                showWindowNetworkDown();
+                return;
+            }
+            Window window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.window_loading_static));
+
+            Glide.MainWindow = window;
+            Glide.MainWindow.Invalidate();
+        }
+
+        public static void showWindowCameraDown()
+        {
+            if (!Program.NetworkUp)
+            {
+                showWindowNetworkDown();
+                return;
+            }
+            Window window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.window_camera_down));
+            GHI.Glide.UI.Button camButton = (GHI.Glide.UI.Button)window.GetChildByName("retry");
+
+            camButton.TapEvent += camButton_TapEvent;
+
+            Glide.MainWindow = window;
+            Glide.MainWindow.Invalidate();
+        }
+
+        static void camButton_TapEvent(object sender)
+        {
+            if(!Program.cameraDisconnected)
+                showWindowInsertPin();
         }
        
 
@@ -301,7 +425,8 @@ namespace Client
 
         static void btnRetry_TapEvent(object sender)
         {
-
+            if(Program.NetworkUp)
+                showWindowInsertPin();
         }
 
         static void btnNext_TapEvent(object sender)

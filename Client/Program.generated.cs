@@ -10,6 +10,7 @@
 
 namespace Client {
     using Gadgeteer;
+    using System.Threading;
     using GTM = Gadgeteer.Modules;
     
     
@@ -54,8 +55,11 @@ namespace Client {
             // Important to initialize the Mainboard first
             Program.Mainboard = new GHIElectronics.Gadgeteer.FEZSpider();
             Program p = new Program();
-            WindowsManager.getInstance(p);
+            
             p.InitializeModules();
+
+            WindowsManager.getInstance(p);
+
             p.ProgramStarted();
             // Starts Dispatcher
             p.Run();
@@ -65,9 +69,11 @@ namespace Client {
             this.button = new GTM.GHIElectronics.Button(4);
             this.usbClientDP = new GTM.GHIElectronics.USBClientDP(1);
             this.camera = new GTM.GHIElectronics.Camera(3);
+            Thread.Sleep(200);
             this.displayT35 = new GTM.GHIElectronics.DisplayT35(14, 13, 12, 10);
             this.multicolorLED = new GTM.GHIElectronics.MulticolorLED(11);
             this.ethernetJ11D = new GTM.GHIElectronics.EthernetJ11D(7);
+            Thread.Sleep(200);
             this.extender = new GTM.GHIElectronics.Extender(8);
             this.joystick = new GTM.GHIElectronics.Joystick(9);
         }

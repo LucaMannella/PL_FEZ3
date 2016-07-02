@@ -22,7 +22,7 @@ namespace Server
         private const string NOALARM = "no-";
         MySocket clientsock;
         private Boolean isdead = false;
-
+        private Boolean keepalive = true;
        // MotionDetector3Optimized motionDetector;
         //oppure usare:
         MotionDetector4 motionDetector;
@@ -33,7 +33,7 @@ namespace Server
         long lungImage = 230454;    //grandezza immagine che mi aspetto di ricevere
 
         //livello che dice quando far scattare allarme ed è compreso tra 0 e 1
-        private double alarmLevel = 0.01;
+        private double alarmLevel = 0.05;
 
         int cont = 0;
         private String myMac;
@@ -110,16 +110,16 @@ namespace Server
                             String strValue = myMac;
                             strValue = Regex.Replace(strValue, @"-", "");
                             strValue = strValue.Remove(strValue.Length - 1);
-
-                            String picturePath = Constants.SERVER_DIRECTORY + Constants.IMAGE_RELATIVE_PATH + strValue + "\\" + "referenceimage" + ".jpg";
-                            String relativePath = Constants.IMAGE_RELATIVE_PATH + strValue + "\\" + "referenceimage" + ".jpg";
+                            long time1 = CurrentTimeMillis();
+                            String picturePath = Constants.SERVER_DIRECTORY + Constants.IMAGE_RELATIVE_PATH + strValue + "\\" + "referenceimage"+ time1 + ".jpg";
+                            String relativePath = Constants.IMAGE_RELATIVE_PATH + strValue + "\\" + "referenceimage"+ time1 + ".jpg";
                             bool exists = System.IO.Directory.Exists(Constants.SERVER_DIRECTORY + Constants.IMAGE_RELATIVE_PATH + "\\" + strValue);
                             if(!exists)
                                 System.IO.Directory.CreateDirectory(Constants.SERVER_DIRECTORY + Constants.IMAGE_RELATIVE_PATH + "\\" + strValue);
                             try
                             {
                                 current1.Save(picturePath);
-                                ok = mDatabase.insertSuspiciousPicturePath(myMac, CurrentTimeMillis(), @"\" + relativePath);
+                                ok = mDatabase.insertSuspiciousPicturePath(myMac, time1, @"\" + relativePath);
                                 if (!ok)
                                     Console.WriteLine("Error: Impossible to store picture: " + picturePath + " on the database!\n");
                             }
@@ -136,6 +136,14 @@ namespace Server
                             System.Drawing.Bitmap current = receiveFile(lungImage, clientsock.s);
                             Thread thread2 = new Thread(() => processImage(current, clientsock));
                             thread2.Start();
+                            break;
+
+                        case "unbind\0":
+                            Console.WriteLine("Received unBind from: " + myMac);
+                            isdead = true;
+                            keepalive = false;
+                            String mac = myMac.Remove(myMac.Length - 1);
+                            mDatabase.removeClient(mac);
                             break;
 
                         default:
@@ -168,9 +176,7 @@ namespace Server
 
         private void checkKeepAlive()
         {
-            Boolean check = true;
-
-            while (check) {
+            while (keepalive) {
                 if(lastTime != 0) {
                     if (CurrentTimeMillis() - lastTime > 50000)
                     {
@@ -182,7 +188,7 @@ namespace Server
 
                         mDatabase.removeClient(mac);  // removing the client from the database
                         sendMail(subject, message, null);
-                        check = false;
+                        keepalive = false;
                         clientsock.Close();
                         isdead = true;
                     }
@@ -210,13 +216,17 @@ namespace Server
                 // check motion level
                 if (motionDetector.MotionLevel >= alarmLevel)
                 {
+                    Console.WriteLine("MotionLevel:"+ motionDetector.MotionLevel);
                     //funzione che esegue operazioni quando scatta allarme
                     byte[] toSend = System.Text.Encoding.UTF8.GetBytes(ALARM);
                     socket.Send(toSend, toSend.Length, SocketFlags.None);
                     socket.Close();
                     Console.WriteLine("Allarme Scattato!\n");
                     isdead = true;
-                    sendMail("Alarm", "The client" + myMac.Remove(0,myMac.Length-1) +" has detected a sospicious motion, the alarm was thrown", MotionDetector4.lastimage);
+                    keepalive = false;
+                    String mac = myMac.Remove(myMac.Length - 1);
+                    mDatabase.removeClient(mac);
+                    sendMail("Alarm", "The client" + mac +" has detected a sospicious motion, the alarm was thrown", MotionDetector4.lastimage);
 
                 }
                 else
@@ -282,8 +292,9 @@ namespace Server
 
         private void sendMail(String subject, String message, String attachmentFilename)
         {
-            var fromAddress = new MailAddress(Constants.MAIL_SENDER, "From Name");
-            var toAddress = new MailAddress(Constants.MAIL_RECEIVER, "To Name");
+            String mac = myMac.Remove(myMac.Length - 1);
+            var fromAddress = new MailAddress(Constants.MAIL_SENDER, "FEZ SuvellianceCamera");
+            var toAddress = new MailAddress(mDatabase.getClientEmail(mac), "Customer");
             String fromPassword = Constants.MAIL_SENDER_PASSWORD;
 
             SmtpClient smtpclient = new SmtpClient();

@@ -168,12 +168,12 @@ namespace Server
                 String strValue = mac;
                 strValue = Regex.Replace(strValue, @"-", "");
                 strValue = strValue.Remove(strValue.Length - 1);
-                String picturePath = Constants.SERVER_DIRECTORY + Constants.IMAGE_RELATIVE_PATH + strValue + "\\" + "rect" + cont + ".jpg";
-                String RelativePath = Constants.IMAGE_RELATIVE_PATH + strValue + "\\" + "rect" + cont + ".jpg";
-                cont++;
+                long time = CurrentTimeMillis();
+                String picturePath = Constants.SERVER_DIRECTORY + Constants.IMAGE_RELATIVE_PATH + strValue + "\\" + "rect" + time + ".jpg";
+                String RelativePath = Constants.IMAGE_RELATIVE_PATH + strValue + "\\" + "rect" + time + ".jpg";
                 image.Save(picturePath);
                 lastimage = picturePath;
-                Boolean ok = mDatabase.insertSuspiciousPicturePath(mac, CurrentTimeMillis(), @"\" + RelativePath);
+                Boolean ok = mDatabase.insertSuspiciousPicturePath(mac, time, @"\" + RelativePath);
                 if (!ok)
                     Console.WriteLine("Error: Impossible to store picture: " + picturePath + " on the database!\n");
                 g.Dispose();

@@ -30,23 +30,30 @@ namespace FinalService
             // Addressing
             IPAddress ipAddress = IPAddress.Parse(Constants.SERVER_IP_ADDR);
             IPEndPoint serverEndPoint = new IPEndPoint(ipAddress, Constants.PORT);
+            try
+            {
+                clientSocket.Connect(serverEndPoint);
+                byte[] toSend = System.Text.Encoding.UTF8.GetBytes(GETPORT);
+                byte[] toSend2 = System.Text.Encoding.UTF8.GetBytes((myMacAddress + '\0'));
+                byte[] bufferReceive = new byte[1000];
+
+                Send(clientSocket, toSend, 0, toSend.Length, 5000);
+                Send(clientSocket, toSend2, 0, toSend2.Length, 5000);
+
+                string port = receive(clientSocket);
+
+                clientSocket.Close();
+                AddressResponse response = new AddressResponse(Constants.SERVER_IP_ADDR, port.Remove(port.Length - 1), CurrentTimeMillis());
+
+                return response;
+            }
+            catch (SocketException e)
+            {
+                AddressResponse response2 = new AddressResponse(Constants.SERVER_IP_ADDR, "" + 404, -2);
+                return response2;
+            }
+
             
-            clientSocket.Connect(serverEndPoint);
-
-            byte[] toSend = System.Text.Encoding.UTF8.GetBytes(GETPORT);
-            byte[] toSend2 = System.Text.Encoding.UTF8.GetBytes((myMacAddress+'\0'));
-            byte[] bufferReceive = new byte[1000];
-                       
-            Send(clientSocket, toSend, 0, toSend.Length, 5000);
-            Send(clientSocket, toSend2, 0, toSend2.Length, 5000);
-
-            string port = receive(clientSocket);
-
-            clientSocket.Close();
-
-            AddressResponse response = new AddressResponse(Constants.SERVER_IP_ADDR, port.Remove(port.Length - 1), CurrentTimeMillis());
-
-            return response;
         }
 
         public static long CurrentTimeMillis()
