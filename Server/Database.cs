@@ -31,13 +31,11 @@ namespace Server
         {
             string myConnectionString = "User Id=root;Host=localhost;Database=PL_FEZ03";
 
-            try
-            {
+            try {
                 myConn = new MySqlConnection(myConnectionString);
                 myConn.Open();
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 connection_Opened = false;
                 Console.WriteLine("Error: Impossible to open the database: " + ex.ToString());
                 return false;
@@ -101,13 +99,11 @@ namespace Server
 
             String query = "SELECT * FROM clients WHERE MAC = '"+MACAddress+"';";
             DataRowCollection records = GetRowsWhithQuery(query, "clients");
-            if (records.Count == 0)
-            {
+            if (records.Count == 0) {
                 query = "INSERT INTO clients(MAC, Port) VALUES('" + MACAddress + "', " + port + ");";
                 res = ExecuteNonQuery(query);
             }
-            else
-            {
+            else {
                 query = "UPDATE clients SET Port="+port+" WHERE MAC='"+MACAddress+"';";
                 res = ExecuteNonQuery(query);
             }
@@ -264,6 +260,29 @@ namespace Server
         }
 
         /**
+         * This method allows to remove all the picture of a specified client
+         * from the database.
+         * 
+         * @param MACAddress - The MAC address of the client.
+         * @returns True if the entries were succesfully removed, false otherwise.
+         */
+        public bool removePictures(String MACAddress)
+        {
+            if (!connection_Opened) {
+                if (OpenConnect() == false)
+                    return false;
+            }
+
+            String query = "DELETE FROM suspicious_pictures WHERE MAC = '" + MACAddress + "';";
+            int res = ExecuteNonQuery(query);
+
+            if (res <= 0)
+                return false;
+            else
+                return true;
+        }
+
+        /**
          * This method execute a non-query on the database (INSERT, UPDATE, DELETE).
          * It returns -1 in case of error.
          */
@@ -274,16 +293,15 @@ namespace Server
                     return -1;
             }
 
-            int toRet = -1;
+            int toRet;
 
-            try
-            {
+            try {
                 MySqlCommand myCommand = new MySqlCommand(query, myConn);
                 toRet = myCommand.ExecuteNonQuery();
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 Console.WriteLine("Error: something wrong in query execution: " + ex.ToString());
+                toRet = -1;
             }
 
             return toRet;

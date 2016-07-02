@@ -32,8 +32,15 @@ namespace Server
                 Console.WriteLine("Warning: Problem in database initialization...\n" +
                             "if it is the first time that you start our system, ignore this warning!");
 
-            Program p = new Program();
-            p.StartListening();
+ //           Program p = new Program();
+ //           p.StartListening();
+
+            if (db.removePictures("aa-bb-cc-dd-ee-ff"))
+                Console.WriteLine("The pictures were succesfully removed!\n");
+            else
+                Console.WriteLine("Impossible to remove the pictures!\n");
+
+            Console.ReadKey();
 
             db.CloseConnect();
             return;
