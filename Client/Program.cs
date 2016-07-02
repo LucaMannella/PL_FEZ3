@@ -51,8 +51,9 @@ namespace Client
         Int32 RGlobal;
         Int32 PreviousAverage;
         long servertime = 0;
+        private String pin;
         private GT.Timer timer_joystick;
-        private Boolean setupComplete = false;
+        public static Boolean setupComplete = false;
         public static Boolean NetworkUp = false;
         private int contImage;
         private Boolean StopAllarm = false;
@@ -60,6 +61,11 @@ namespace Client
         IPEndPoint serverEndPoint = null;  // represent the connection with the server
         TimeSpan interval = new TimeSpan(0, 0, 30);
         PWM buzzer;
+        public String VolatilePin
+        {
+            get { return pin; }
+            set { pin = value; }
+        }
         /**
          * This method is run when the mainboard is powered up or reset.   
          */
@@ -186,62 +192,66 @@ namespace Client
         private GT.Timer timer_keepAlive;
         private void initServer()
         {
-            bindProxyService();
-            getAddressAndPort();
-           
-            IPAddress ipAddress = IPAddress.Parse(connectionInfo[0]);
-            int port = int.Parse(connectionInfo[1]);
-            if (port == -1)
+            if (bindProxyService())
             {
-                Debug.Print("Error: Invalid Port, impossible to establish a connection!\n");
-                WindowsManager.showWindowErrorServer();
-                return;
-            }
-            if (port == 404)
-            {
-                Debug.Print("Error: Server Unreacheable!\n");
-                serverUnreacheable = true;
-                WindowsManager.showWindowServerDown();
-                return;
-            }
-            serverEndPoint = new IPEndPoint(ipAddress, port);
-            servertime += 35000;
-            try
-            {
-                var data = proxy.keepAlive(new keepAlive()
+                getAddressAndPort();
+
+                IPAddress ipAddress = IPAddress.Parse(connectionInfo[0]);
+                int port = int.Parse(connectionInfo[1]);
+                if (port == -1)
                 {
-                    myMacAddress = myMac,
-                    mycurrentTime = servertime,
-                    port = int.Parse(connectionInfo[1]),
-                });
+                    Debug.Print("Error: Invalid Port, impossible to establish a connection!\n");
+                    WindowsManager.showWindowErrorServer();
+                    return;
+                }
+                if (port == 404)
+                {
+                    Debug.Print("Error: Server Unreacheable!\n");
+                    serverUnreacheable = true;
+                    WindowsManager.showWindowServerDown();
+                    return;
+                }
+                serverEndPoint = new IPEndPoint(ipAddress, port);
+                servertime += 35000;
+                try
+                {
+                    var data = proxy.keepAlive(new keepAlive()
+                    {
+                        myMacAddress = myMac,
+                        mycurrentTime = servertime,
+                        port = int.Parse(connectionInfo[1]),
+                    });
+                }
+                catch (SocketException e)
+                {
+
+                    WindowsManager.showWindowErrorService();
+                }
+
+                timer_keepAlive = new GT.Timer(35000);
+                timer_keepAlive.Tick += keepAlive;
+                timer_keepAlive.Start();
+
+                bitmapA = null;
+                serverUnreacheable = false;
+                setupComplete = true;
+                Thread.Sleep(400);
+                contImage = 0;
+                camera.TakePicture();
             }
-            catch (SocketException e)
-            {
-
-                WindowsManager.showWindowErrorService();
-            }   
-
-            timer_keepAlive = new GT.Timer(35000);
-            timer_keepAlive.Tick += keepAlive;
-            timer_keepAlive.Start();
-
-            bitmapA = null;
-            serverUnreacheable = false;
-            setupComplete = true;
-            Thread.Sleep(400);
-            contImage = 0;
-            camera.TakePicture();
         }
 
         /**
          * This method binding the service
          */
-        private void bindProxyService()
+        private Boolean bindProxyService()
         {
             Debug.Print("Binding proxy service...");
             try
             {
-                proxy = new IService1ClientProxy(new WS2007HttpBinding(), new ProtocolVersion11());
+                WS2007HttpBinding a = new WS2007HttpBinding();
+                ProtocolVersion11 b = new ProtocolVersion11();
+                proxy = new IService1ClientProxy(a, b);
 
                 // NOTE: the endpoint needs to match the endpoint of the servicehost
                 proxy.EndpointAddress = SERVICE_ADDR;
@@ -250,10 +260,18 @@ namespace Client
             catch (SocketException e)
             {
                 WindowsManager.showWindowServiceDown();
+                return false;
+            }
+            catch (ObjectDisposedException e)
+            {
+                Debug.Print("Disposed object exception");
+                WindowsManager.showWindowServiceDown();
+                return false;
             }
            
-
+            
             Debug.Print("Binding proxy service COMPLETE");
+            return true;
         }
 
         /**
@@ -279,7 +297,7 @@ namespace Client
             }
             catch (Exception e)
             {
-                WindowsManager.showWindowErrorService();
+                WindowsManager.showWindowServiceDown();
             }
            
         }
@@ -565,7 +583,10 @@ namespace Client
             NetworkUp = false;
             if (proxy != null)
             {
+                proxy.closeChannel();
                 proxy.Dispose();
+                proxy.Dispose();
+                proxy = null;
             }
             multicolorLED.TurnRed();
 
@@ -575,6 +596,7 @@ namespace Client
                 timer_keepAlive.Stop();
                 if(!throw_allarm)
                     ThrowAllarm();
+                WindowsManager.showWindowInsertPin();
             }
             else
             {
@@ -611,20 +633,25 @@ namespace Client
             return new string(Encoding.UTF8.GetChars(buf));
         }
 
-
+        
         public int checkLogin(String pin)
         {
            // HashAlgorithm hashSHA256 = new HashAlgorithm(HashAlgorithmType.MD5);
             Byte[] dataToHmac = System.Text.Encoding.UTF8.GetBytes(pin);
-
-            if (!NetworkUp)
+            
+            if (setupComplete && !NetworkUp && VolatilePin.Length == 8)
             {
-                WindowsManager.showWindowNetworkDown();
-                return 2;
+                if (VolatilePin.Equals(pin))
+                {
+                    deactivateSystem();
+                    return 2;
+                }
             }
-
-            if (setupComplete)
+         
+            if (setupComplete && NetworkUp)
             {
+               
+
                 var data = proxy.isValid(new isValid()
                 {
                     mac = myMac,
@@ -640,6 +667,13 @@ namespace Client
                 return -1 ;
             }
 
+            if (!NetworkUp)
+            {
+                WindowsManager.showWindowNetworkDown();
+                return 2;
+            }
+
+
             bindProxyService();
             
             try
@@ -652,7 +686,9 @@ namespace Client
                 });
                 if (data2.isValidResult)
                 {
+                    VolatilePin = pin;
                     return 0;
+
                 }
                 else
                 {
