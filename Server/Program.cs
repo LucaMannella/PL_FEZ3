@@ -93,32 +93,24 @@ namespace Server
 
                         String macToCheck = macaddr.Substring(0, macaddr.Length - 1);
 
-                        if (!db.existClient(macToCheck))
+                        int port = startingport + progressiveport;
+                        progressiveport++;
+
+                        Boolean ok = db.insertClient(macaddr, port);
+                        if (!ok)
                         {
-                            int port = startingport + progressiveport;
-                            progressiveport++;
-
-                            Boolean ok = db.insertClient(macaddr, port);
-                            if (!ok)
-                            {
-                                Console.WriteLine("Error: Impossible to save new client in db!");
-                                sendPort(-1);
-                                return;
-                            }
-
-                            sendPort(port);
-
-                            // This method manage the comunication between this client and the server.
-                            ClientManager client = new ClientManager(macaddr, port);
-                            client.start();
-
-                            Console.WriteLine("Client: " + macaddr + " on port: " + port + " has ended!\n");
-                        }
-                        else
-                        {
-                            Console.WriteLine("Error: Device: " + macaddr + " it is already present in the database!\n");
+                            Console.WriteLine("Error: Impossible to save new client in db!");
                             sendPort(-1);
+                            return;
                         }
+
+                        sendPort(port);
+
+                        // This method manage the comunication between this client and the server.
+                        ClientManager client = new ClientManager(macaddr, port);
+                        client.start();
+
+                        Console.WriteLine("Client: " + macaddr + " on port: " + port + " has ended!\n");
                         break;
 
                     default:
