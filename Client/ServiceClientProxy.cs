@@ -34,9 +34,14 @@ namespace tempuri.org
         public IService1ClientProxy(Binding binding, ProtocolVersion version) : 
                 base(binding, version)
         {
-
             // Set client endpoint address
             m_requestChannel = m_localBinding.CreateClientChannel(new ClientBindingContext(m_version));
+           
+        }
+
+        public void closeChannel()
+        {
+            m_requestChannel.Close();
         }
         
         public virtual getServerAddressWithPortResponse getServerAddressWithPort(getServerAddressWithPort req)

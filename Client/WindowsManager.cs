@@ -30,7 +30,7 @@ namespace Client
 
         public static void showWindowInsertPin(){
 
-            if (!Program.NetworkUp)
+            if (!Program.NetworkUp && !Program.setupComplete)
             {
                 showWindowNetworkDown();
                 return;
