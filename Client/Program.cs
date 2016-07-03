@@ -124,8 +124,7 @@ namespace Client
                 button.ButtonPressed += button_ButtonPressed;
                 invalidate = true;
                 serverUnreacheable = false;
-                progress = WindowsManager.showWindowProgress();
-            
+                WindowsManager.showWindowLoadingStatic();
                 try
                 {
                     camera.StartStreaming();
@@ -134,10 +133,12 @@ namespace Client
                 {
                     Debug.Print("Already Streaming");
                 }
-                
+                /*
                 timer_progress = new GT.Timer(350);
                 timer_progress.Tick += progressIncrement;
                 timer_progress.Start();
+                 */
+             
             }  
         }
 
@@ -149,10 +150,12 @@ namespace Client
         {
             if (invalidate)
             {
+                /*
                 timer_progress.Stop();
                 Thread.Sleep(100); 
                 progress.Value = 100;
                 progress.Invalidate();
+                 * */
                 invalidate = false;
                 setupJoystick();
             }
@@ -171,7 +174,7 @@ namespace Client
             camera.StopStreaming();
             timer_joystick.Stop();
             WindowsManager.showWindowLoadingStatic();
-            Thread.Sleep(300);
+            Thread.Sleep(200);
 
             if (NetworkUp)
             {
@@ -202,6 +205,7 @@ namespace Client
                 {
                     Debug.Print("Error: Invalid Port, impossible to establish a connection!\n");
                     WindowsManager.showWindowErrorServer();
+                    serverUnreacheable = true;
                     return;
                 }
                 if (port == 404)
@@ -222,10 +226,12 @@ namespace Client
                         port = int.Parse(connectionInfo[1]),
                     });
                 }
-                catch (SocketException e)
+                catch (Exception e)
                 {
 
-                    WindowsManager.showWindowErrorService();
+                    WindowsManager.showWindowServiceDown();
+                    serverUnreacheable = true;
+                    return;
                 }
 
                 timer_keepAlive = new GT.Timer(35000);
@@ -235,7 +241,7 @@ namespace Client
                 bitmapA = null;
                 serverUnreacheable = false;
                 setupComplete = true;
-                Thread.Sleep(400);
+                Thread.Sleep(300);
                 contImage = 0;
                 camera.TakePicture();
             }
@@ -330,7 +336,7 @@ namespace Client
          */
         private void camera_PictureCaptured(GTM.GHIElectronics.Camera sender, GT.Picture picture)
         {
-            if (throw_allarm || picture==null)
+            if (throw_allarm || picture==null || !setupComplete)
                 return;
             
             Int32 HeurSum = 0;
@@ -415,35 +421,45 @@ namespace Client
          */
         private void sendPicture(byte[] e, Boolean first)
         {
-            byte[] cmd;
-            Socket clientSocket = new Socket(
-                AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
-            Debug.Print("Connecting to server " + serverEndPoint + ".");
-            clientSocket.Connect(serverEndPoint);
-            Debug.Print("Connected to server.");
-
-            if (first)
+            try
             {
-                cmd = Encoding.UTF8.GetBytes(FIRST_IMAGE_COMMAND);
+                byte[] cmd;
+                Socket clientSocket = new Socket(
+                    AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+                Debug.Print("Connecting to server " + serverEndPoint + ".");
+                clientSocket.Connect(serverEndPoint);
+                Debug.Print("Connected to server.");
+
+                if (first)
+                {
+                    cmd = Encoding.UTF8.GetBytes(FIRST_IMAGE_COMMAND);
+                }
+                else
+                {
+                    cmd = Encoding.UTF8.GetBytes(MANAGE_IMAGE_COMMAND);
+                }
+
+                clientSocket.Send(cmd);
+                clientSocket.Send(e);
+
+                String response = reciveResponse(clientSocket);
+                Debug.Print(response);
+
+                if (response.Equals(ALARM))
+                {
+                    ThrowAllarm();
+                }
+
+                clientSocket.Close();
+
             }
-            else
+            catch (Exception e2)
             {
-                cmd = Encoding.UTF8.GetBytes(MANAGE_IMAGE_COMMAND);
+                if (setupComplete)
+                    if (!throw_allarm)
+                        ThrowAllarm();
             }
-
-            clientSocket.Send(cmd);
-            clientSocket.Send(e);
-
-            String response = reciveResponse(clientSocket);
-            Debug.Print(response);
-
-            if (response.Equals(ALARM))
-            {
-                ThrowAllarm();
-            }
-
-            clientSocket.Close();
         }
 
         /**
@@ -706,7 +722,9 @@ namespace Client
 
         private void deactivateSystem()
         {
-            
+            invalidate = true;
+            setupComplete = false;
+   
             if (throw_allarm) {
                 SpegniAllarme();
                 throw_allarm = false;
@@ -719,8 +737,11 @@ namespace Client
             {
                 timer_keepAlive.Stop();
             }
-            invalidate = true;
-            setupComplete = false;
+            if (timer_getimage.IsRunning)
+            {
+                timer_getimage.Stop();
+            }
+           
 
             WindowsManager.showWindowSetupCamera();
         }
@@ -752,6 +773,10 @@ namespace Client
 
         private void joystick_function(GT.Timer timer)
         {
+            if (setupComplete)
+            {
+                return;
+            }
             double realX = 0, realY = 0;
             Joystick.Position newJoystickPosition = joystick.GetPosition();
             double newX = joystickPosition.X;

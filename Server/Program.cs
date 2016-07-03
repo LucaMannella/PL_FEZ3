@@ -96,7 +96,7 @@ namespace Server
                         int port = startingport + progressiveport;
                         progressiveport++;
 
-                        Boolean ok = db.insertClient(macaddr, port);
+                        Boolean ok = db.insertClient(macToCheck, port);
                         if (!ok)
                         {
                             Console.WriteLine("Error: Impossible to save new client in db!");
