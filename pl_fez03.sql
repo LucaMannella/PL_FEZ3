@@ -53,7 +53,7 @@ DROP TABLE IF EXISTS `suspicious_pictures`;
 CREATE TABLE IF NOT EXISTS `suspicious_pictures` (
   `MAC` char(17) NOT NULL,
   `Timestamp` bigint(20) NOT NULL,
-  `Path` varchar(100) NOT NULL
+  `Path` varchar(512) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 -- --------------------------------------------------------
 
