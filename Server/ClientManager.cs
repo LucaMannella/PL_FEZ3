@@ -33,7 +33,7 @@ namespace Server
         long lungImage = 230454;    //grandezza immagine che mi aspetto di ricevere
 
         //livello che dice quando far scattare allarme ed è compreso tra 0 e 1
-        private double alarmLevel = 0.05;
+        private double alarmLevel = 0.1;
 
         int cont = 0;
         private String myMac;
@@ -107,19 +107,24 @@ namespace Server
                         case "firstImage\0":
                             Console.WriteLine("Received first image from: " + myMac);
                             System.Drawing.Bitmap current1 = receiveFile(lungImage, clientsock.s);
+                            long time1 = CurrentTimeMillis();
+
                             String strValue = myMac;
                             strValue = Regex.Replace(strValue, @"-", "");
                             strValue = strValue.Remove(strValue.Length - 1);
-                            long time1 = CurrentTimeMillis();
-                            String picturePath = Constants.SERVER_DIRECTORY + Constants.IMAGE_RELATIVE_PATH + strValue + "\\" + "referenceimage"+ time1 + ".jpg";
-                            String relativePath = Constants.IMAGE_RELATIVE_PATH + strValue + "\\" + "referenceimage"+ time1 + ".jpg";
-                            bool exists = System.IO.Directory.Exists(Constants.SERVER_DIRECTORY + Constants.IMAGE_RELATIVE_PATH + "\\" + strValue);
+                           
+                            String pictureFolderName = strValue+"\\firstimage"+time1+".jpg";
+                            String picturePath = Constants.SERVER_DIRECTORY + Constants.IMAGES_FOLDER + pictureFolderName;
+                            String relativePath = Constants.IMAGES_FOLDER + pictureFolderName;
+
+                            bool exists = System.IO.Directory.Exists(Constants.SERVER_DIRECTORY + Constants.IMAGES_FOLDER + "\\" + strValue);
                             if(!exists)
-                                System.IO.Directory.CreateDirectory(Constants.SERVER_DIRECTORY + Constants.IMAGE_RELATIVE_PATH + "\\" + strValue);
+                                System.IO.Directory.CreateDirectory(Constants.SERVER_DIRECTORY + Constants.IMAGES_FOLDER + "\\" + strValue);
                             try
                             {
                                 current1.Save(picturePath);
-                                ok = mDatabase.insertSuspiciousPicturePath(myMac, time1, @"\" + relativePath);
+                                String path = relativePath.Replace("\\", "/");
+                                ok = mDatabase.insertSuspiciousPicturePath(myMac, time1, @"./" + path);
                                 if (!ok)
                                     Console.WriteLine("Error: Impossible to store picture: " + picturePath + " on the database!\n");
                             }

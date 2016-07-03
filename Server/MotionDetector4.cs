@@ -169,11 +169,15 @@ namespace Server
                 strValue = Regex.Replace(strValue, @"-", "");
                 strValue = strValue.Remove(strValue.Length - 1);
                 long time = CurrentTimeMillis();
-                String picturePath = Constants.SERVER_DIRECTORY + Constants.IMAGE_RELATIVE_PATH + strValue + "\\" + "rect" + time + ".jpg";
-                String RelativePath = Constants.IMAGE_RELATIVE_PATH + strValue + "\\" + "rect" + time + ".jpg";
+                String pictureFolderName = strValue+"\\image"+time+".jpg";
+
+                String picturePath = Constants.SERVER_DIRECTORY + Constants.IMAGES_FOLDER + pictureFolderName;
                 image.Save(picturePath);
                 lastimage = picturePath;
-                Boolean ok = mDatabase.insertSuspiciousPicturePath(mac, time, @"\" + RelativePath);
+
+                String RelativePath = Constants.IMAGES_FOLDER + pictureFolderName;
+                String path = RelativePath.Replace("\\", "/");
+                Boolean ok = mDatabase.insertSuspiciousPicturePath(mac, time, @"./" + path);
                 if (!ok)
                     Console.WriteLine("Error: Impossible to store picture: " + picturePath + " on the database!\n");
                 g.Dispose();
