@@ -283,7 +283,7 @@ namespace Client
         {
             showWindowInsertPin();
         }
-
+        /*
         public static GHI.Glide.UI.ProgressBar showWindowProgress()
         {
 
@@ -298,14 +298,14 @@ namespace Client
             Glide.MainWindow.Invalidate();
             return progress;
         }
-
+        */
         public static void showWindowNetworkDown()
         {
 
             Window window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.window_network_down));
-            GHI.Glide.UI.Button btnRetry = (GHI.Glide.UI.Button)window.GetChildByName("btn_retry");
+        //    GHI.Glide.UI.Button btnRetry = (GHI.Glide.UI.Button)window.GetChildByName("btn_retry");
 
-            btnRetry.TapEvent += btnRetry_TapEvent;
+        //    btnRetry.TapEvent += btnRetry_TapEvent;
             GlideTouch.Initialize();
             Glide.MainWindow = window;
             Glide.MainWindow.Invalidate();
