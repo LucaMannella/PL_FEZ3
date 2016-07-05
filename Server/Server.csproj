@@ -54,7 +54,6 @@
     <Compile Include="Constants.cs" />
     <Compile Include="Database.cs" />
     <Compile Include="IMotionDetector.cs" />
-    <Compile Include="MotionDetector3Optimized.cs" />
     <Compile Include="MotionDetector4.cs" />
     <Compile Include="MySocket.cs" />
     <Compile Include="Program.cs" />

@@ -55,6 +55,7 @@ namespace Client
         private GT.Timer timer_joystick;
         public static Boolean setupComplete = false;
         public static Boolean NetworkUp = false;
+        private Boolean streaming = false;
         private int contImage;
         private Boolean StopAllarm = false;
         IService1ClientProxy proxy;
@@ -127,6 +128,7 @@ namespace Client
                 WindowsManager.showWindowLoadingStatic();
                 try
                 {
+                    streaming = true;
                     camera.StartStreaming();
                 }
                 catch (InvalidOperationException e)
@@ -160,7 +162,7 @@ namespace Client
                 setupJoystick();
             }
             Debug.Print("Refresh streaming");
-            if(NetworkUp && !setupComplete && !serverUnreacheable)
+            if(NetworkUp && !setupComplete && !serverUnreacheable && streaming)
                 displayT35.SimpleGraphics.DisplayImage(e, 0, 0);
         }
 
@@ -171,6 +173,8 @@ namespace Client
         {
             Debug.Print("Button pressed!");
             button.ButtonPressed -= button_ButtonPressed;
+            streaming = false;
+            camera.StopStreaming();
             camera.StopStreaming();
             timer_joystick.Stop();
             WindowsManager.showWindowLoadingStatic();
@@ -326,8 +330,13 @@ namespace Client
             }
             catch (SocketException e)
             {
-
-                WindowsManager.showWindowErrorService();
+                if (timer_keepAlive.IsRunning)
+                {
+                    timer_keepAlive.Stop();
+                }
+                if (setupComplete)
+                    if (!throw_allarm)
+                        ThrowAllarm();
             }   
         }
 
@@ -597,6 +606,7 @@ namespace Client
         {
             Debug.Print("Network down!");
             NetworkUp = false;
+            multicolorLED.TurnRed();
             if (proxy != null)
             {
                 proxy.closeChannel();
@@ -604,8 +614,16 @@ namespace Client
                 proxy.Dispose();
                 proxy = null;
             }
-            multicolorLED.TurnRed();
 
+            if (streaming) {
+                streaming = false;
+                camera.StopStreaming();
+                button.ButtonPressed -= button_ButtonPressed;
+                if (timer_joystick.IsRunning)
+                {
+                    timer_joystick.Stop();
+                }
+            }
 
             if (setupComplete)
             {
@@ -654,8 +672,8 @@ namespace Client
         {
            // HashAlgorithm hashSHA256 = new HashAlgorithm(HashAlgorithmType.MD5);
             Byte[] dataToHmac = System.Text.Encoding.UTF8.GetBytes(pin);
-            
-            if (setupComplete && !NetworkUp && VolatilePin.Length == 8)
+
+            if ((setupComplete && !NetworkUp && VolatilePin.Length == 8) || (setupComplete && NetworkUp && VolatilePin.Length == 8))
             {
                 if (VolatilePin.Equals(pin))
                 {
@@ -666,21 +684,29 @@ namespace Client
          
             if (setupComplete && NetworkUp)
             {
-               
 
-                var data = proxy.isValid(new isValid()
+                try
                 {
-                    mac = myMac,
-                    pin = dataToHmac
+                    var data = proxy.isValid(new isValid()
+                    {
+                        mac = myMac,
+                        pin = dataToHmac
 
-                });
+                    });
 
-                if (data.isValidResult)
-                {
-                    deactivateSystem();
-                    return 2;
+                    if (data.isValidResult)
+                    {
+                        deactivateSystem();
+                        return 2;
+                    }
+                    return -1;
                 }
-                return -1 ;
+                catch (Exception e)
+                {
+                    WindowsManager.showWindowServiceDown();
+                    return 1;
+                }
+               
             }
 
             if (!NetworkUp)
